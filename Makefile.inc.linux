@@ -1,0 +1,8 @@
+-include ../system.config
+
+HOST=arm-none-linux-gnueabi
+CROSS=$(TOOLCHAIN_LINUX)/$(HOST)
+
+CFLAGS=-mcpu=arm926ej-s
+CC=$(CROSS)-gcc
+LD=$(CROSS)-ld
