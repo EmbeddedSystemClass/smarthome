@@ -2,13 +2,18 @@
 #include "stm32f0xx_gpio.h"
 #include "stm32f0xx_rcc.h"
 #include "stm32f0xx_spi.h"
-//#include <stdint.h>
+#include "stm32f0xx_usart.h"
+#include "stm32f0xx_misc.h"
+#include <stdint.h>
+#include <stdio.h>
 #include "tm_stm32f4_nrf24l01.h"
 
 #define 	LED1_ON 	GPIO_SetBits(GPIOA, GPIO_Pin_4)
 #define 	LED1_OFF 	GPIO_ResetBits(GPIOA, GPIO_Pin_4)
 #define 	LED2_ON 	GPIO_SetBits(GPIOA, GPIO_Pin_3)
 #define 	LED2_OFF 	GPIO_ResetBits(GPIOA, GPIO_Pin_3)
+
+#define DEBUG
 
 
 /* My address */
@@ -38,7 +43,7 @@ void GPIO_Configuration(void)
 
     /* Configure SPI CLK (PA.05), SPI MOSI (PA.07)
      * as alternate function push-pull */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_6;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_3 | GPIO_Pin_2;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -52,8 +57,8 @@ void GPIO_Configuration(void)
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 	*/
 
-    /* Configure LEDs (PA.4, PA.3) */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_3 | NRF24L01_CSN_PIN | NRF24L01_CE_PIN;
+    /* Configure LEDs (PA.4) */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | NRF24L01_CSN_PIN | NRF24L01_CE_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -67,9 +72,8 @@ void RCC_Configuration(void)
 	/* Enable USART1 for debug output */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 #endif
-
-	/* Enable GPIOC */
-	RCC_APB2PeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+	/* Enable GPIOA, SPI */
+	RCC_APB2PeriphClockCmd(RCC_AHBPeriph_GPIOA | RCC_APB2Periph_SPI1, ENABLE);
 }
 
 
@@ -96,6 +100,62 @@ void SPI_Configuration(void)
 }
 
 
+/* NVIC_Configuration */
+void NVIC_Configuration(void)
+{
+  NVIC_InitTypeDef NVIC_InitStructure;
+
+  /* Enable the USART2 Interrupt */
+#ifdef DEBUG
+  NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+#endif
+  //NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  //NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+}
+
+
+#ifdef DEBUG
+/* USART_Configuration */
+void USART_Configuration(void)
+{
+	USART_InitTypeDef USART_InitStructure;
+
+	/* Fill USART_InitStructure with default values
+	* (9600, 8 bit, 1 stop bit, no flow control) */
+	USART_StructInit(&USART_InitStructure);
+	/* Set baudrate to 115200 */
+	USART_InitStructure.USART_BaudRate = 115200;
+
+	/* Init USART1 */
+	USART_Init(USART1, &USART_InitStructure);
+}
+
+/* Print string over UART */
+void UART_PrintStr(char *str) {
+	while (*str) {
+		while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET) {
+		}
+		USART_SendData(USART1, *str++);
+	}
+}
+
+/* Print data over UART */
+void UART_PrintData(unsigned char *data, unsigned int n)
+{
+	char str[16];
+
+	UART_PrintStr("[ ");
+	while (n--) {
+		sprintf(str, "%d ", *data++);
+		UART_PrintStr(str);
+	}
+	UART_PrintStr("]\r\n");
+}
+#endif
+
+
 void delay(uint32_t time)
 {
 	volatile uint32_t i = time * 1000;
@@ -115,6 +175,12 @@ int main(void)
 	RCC_Configuration();
 	GPIO_Configuration();
 	SPI_Configuration();
+#ifdef DEBUG
+	USART_Configuration();
+#endif
+	NVIC_Configuration();
+
+	UART_PrintStr("Hello");
 
 	LED2_ON;
 

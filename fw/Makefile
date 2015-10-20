@@ -16,6 +16,8 @@ INCLUDES += -I$(STM_SPL_INC)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_gpio.c)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_rcc.c)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_spi.c)
+CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_misc.c)
+CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_usart.c)
 
 # FreeRTOS
 #INCLUDES +=  -I../libs/FreeRTOS/Source/include -I../libs/FreeRTOS/Source/portable/GCC/ARM_CM3
