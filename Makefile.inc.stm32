@@ -1,0 +1,69 @@
+-include ../system.config
+OUTPUTDIR = $(BUILDDIR)/../../output
+ELFOUTPUTDIR = $(BUILDDIR)/../../output_elf
+
+DEPDIR = $(BUILDDIR)/.dep
+PWD = $(shell pwd)
+
+#COMMONFLAGS = -mcpu=cortex-m3 -mthumb
+COMMONFLAGS = -mcpu=cortex-m0 -mthumb
+CFLAGS += $(COMMONFLAGS) -Os $(INCLUDES) -I.
+CFLAGS += -std=c99 -Wall -Wextra -static -fdata-sections -ffunction-sections -fno-hosted -fno-builtin
+CFLAGS += -nostdlib -nodefaultlibs
+CFLAGS += -mapcs-frame -msoft-float -ggdb3
+CFLAGS += -MD -MP -MF $(DEPDIR)/$(@F).d
+LDFLAGS = $(COMMONFLAGS) -static
+LDFLAGS += -fno-exceptions -ffunction-sections -fdata-sections
+LDFLAGS += -static -Xlinker --gc-sections
+ASFLAGS = $(COMMONFLAGS)
+
+CROSS = $(TOOLCHAIN_STM32)/arm-none-eabi
+GCC = $(CROSS)-gcc
+AS = $(CROSS)-as
+SIZE = $(CROSS)-size
+OBJCOPY = $(CROSS)-objcopy
+OBJDUMP = $(CROSS)-objdump
+NM = $(CROSS)-nm
+
+COBJ = $(addprefix $(BUILDDIR)/, $(CSRC:.c=.c.o))
+ASMOBJ = $(addprefix $(BUILDDIR)/, $(ASMSRC:.s=.s.o))
+OBJ = $(COBJ) $(ASMOBJ)
+
+VERBOSE = 1
+V = $(if $(VERBOSE), , @)
+
+
+all: prebuild $(BUILDDIR)/$(TARGET).elf $(LDSCRIPT)
+	@$(SIZE) $(BUILDDIR)/$(TARGET).elf
+	@$(OBJCOPY) -O binary $(BUILDDIR)/$(TARGET).elf $(BUILDDIR)/$(TARGET).bin
+	@$(OBJCOPY) -O ihex $(BUILDDIR)/$(TARGET).elf $(BUILDDIR)/$(TARGET).hex
+	@$(OBJDUMP) -h -S -z $(BUILDDIR)/$(TARGET).elf > $(BUILDDIR)/$(TARGET).lss
+	@$(NM) -n $(BUILDDIR)/$(TARGET).elf > $(BUILDDIR)/$(TARGET).sym
+	@mkdir -p $(OUTPUTDIR)
+	@mkdir -p $(ELFOUTPUTDIR)
+	@cp $(BUILDDIR)/$(TARGET).bin $(OUTPUTDIR)
+	@cp $(BUILDDIR)/$(TARGET).elf $(ELFOUTPUTDIR)
+	@echo =======================================================================
+
+
+$(BUILDDIR)/$(TARGET).elf: $(OBJ)
+	@echo Linking $@
+	$(V)$(GCC) $(LDFLAGS) -T $(PWD)/$(LDSCRIPT) -o $@ $(OBJ)
+
+$(COBJ): $(BUILDDIR)/%.c.o : %.c
+	@echo Compiling $<
+	@-mkdir -p $(@D)
+	$(V)$(GCC) $(CFLAGS) -c $< -o $@
+
+$(ASMOBJ): $(BUILDDIR)/%.s.o : %.s
+	@echo Assembling $<
+	@-mkdir -p $(@D)
+	$(V)$(AS) $(ASFLAGS) -c ./$< -o $@
+
+
+-include $(shell mkdir -p $(DEPDIR) 2>/dev/null) $(wildcard $(DEPDIR)/*)
+
+.PHONY: clean output
+
+clean:
+	rm -rf $(BUILDDIR)
