@@ -10,8 +10,8 @@
 
 #define 	LED1_ON 	GPIO_SetBits(GPIOA, GPIO_Pin_4)
 #define 	LED1_OFF 	GPIO_ResetBits(GPIOA, GPIO_Pin_4)
-#define 	LED2_ON 	GPIO_SetBits(GPIOA, GPIO_Pin_3)
-#define 	LED2_OFF 	GPIO_ResetBits(GPIOA, GPIO_Pin_3)
+//#define 	LED2_ON 	GPIO_SetBits(GPIOA, GPIO_Pin_3)
+//#define 	LED2_OFF 	GPIO_ResetBits(GPIOA, GPIO_Pin_3)
 
 #define DEBUG
 
@@ -41,9 +41,21 @@ void GPIO_Configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_1);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);
+
     /* Configure SPI CLK (PA.05), SPI MOSI (PA.07)
      * as alternate function push-pull */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_3 | GPIO_Pin_2;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_2;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    /* Configure SPI CLK (PA.05), SPI MOSI (PA.07)
+     * as alternate function push-pull */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_6;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -130,6 +142,9 @@ void USART_Configuration(void)
 
 	/* Init USART1 */
 	USART_Init(USART1, &USART_InitStructure);
+
+	/* Enable USART1 */
+	USART_Cmd(USART1, ENABLE);
 }
 
 /* Print string over UART */
@@ -175,14 +190,14 @@ int main(void)
 	RCC_Configuration();
 	GPIO_Configuration();
 	SPI_Configuration();
-#ifdef DEBUG
-	USART_Configuration();
-#endif
 	NVIC_Configuration();
 
-	UART_PrintStr("Hello");
+#ifdef DEBUG
+	USART_Configuration();
+	UART_PrintStr("Hello\n");
+#endif
 
-	LED2_ON;
+	//LED2_ON;
 
 	TM_NRF24L01_Transmit_Status_t transmissionStatus;
 
@@ -206,44 +221,48 @@ int main(void)
     	delay(1000);
     	LED1_OFF;
     	delay(1000);
+    	UART_PrintStr("!");
+#if 0
+		/* Fill data with something */
+		//sprintf((char *)dataOut, "abcdefghijklmnoszxABCDEFCBDA");
 
-			/* Fill data with something */
-			//sprintf((char *)dataOut, "abcdefghijklmnoszxABCDEFCBDA");
+		/* Transmit data, goes automatically to TX mode */
+		TM_NRF24L01_Transmit(dataOut);
 
-			/* Transmit data, goes automatically to TX mode */
-			TM_NRF24L01_Transmit(dataOut);
+		/* Turn on led to indicate sending */
+		LED1_ON;
 
-			/* Turn on led to indicate sending */
-			LED1_ON;
+		/* Wait for data to be sent */
 
-			/* Wait for data to be sent */
-			do {
-				transmissionStatus = TM_NRF24L01_GetTransmissionStatus();
-			} while (transmissionStatus == TM_NRF24L01_Transmit_Status_Sending);
+		do {
+			transmissionStatus = TM_NRF24L01_GetTransmissionStatus();
+		} while (transmissionStatus == TM_NRF24L01_Transmit_Status_Sending);
 
-			/* Turn off led */
-			LED1_OFF;
 
-			/* Go back to RX mode */
-			TM_NRF24L01_PowerUpRx();
+		/* Turn off led */
+		LED1_OFF;
 
-			/* Wait received data, wait max 100ms, if time is larger, then data were probably lost */
-			while (!TM_NRF24L01_DataReady() && (d < 10)) {
-				delay(100);
-				d++;
-			}
-			d = 0;
+		/* Go back to RX mode */
+		TM_NRF24L01_PowerUpRx();
 
-			/* Get data from NRF2L01+ */
-			TM_NRF24L01_GetData(dataIn);
+		/* Wait received data, wait max 100ms, if time is larger, then data were probably lost */
+		while (!TM_NRF24L01_DataReady() && (d < 10)) {
+			delay(100);
+			d++;
+		}
+		d = 0;
 
-			/* Check transmit status */
-			if (transmissionStatus == TM_NRF24L01_Transmit_Status_Ok) {
+		/* Get data from NRF2L01+ */
+		TM_NRF24L01_GetData(dataIn);
 
-			} else if (transmissionStatus == TM_NRF24L01_Transmit_Status_Lost) {
+		/* Check transmit status */
+		if (transmissionStatus == TM_NRF24L01_Transmit_Status_Ok) {
 
-			} else {
+		} else if (transmissionStatus == TM_NRF24L01_Transmit_Status_Lost) {
 
-			}
-    	}
+		} else {
+
+		}
+#endif
+	}
 }
