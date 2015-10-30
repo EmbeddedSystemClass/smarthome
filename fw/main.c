@@ -84,8 +84,15 @@ void RCC_Configuration(void)
 	/* Enable USART1 for debug output */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 #endif
-	/* Enable GPIOA, SPI */
-	RCC_APB2PeriphClockCmd(RCC_AHBPeriph_GPIOA | RCC_APB2Periph_SPI1, ENABLE);
+	/* Enable SPI */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+
+	/* Enable GPIOA */
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_DBGMCU, ENABLE);
 }
 
 
@@ -181,10 +188,32 @@ void delay(uint32_t time)
 }
 
 
+void SysTick_Handler(void) {
+  static uint16_t tick = 0;
+
+  switch (tick++) {
+  	case 100:
+  		tick = 0;
+  		GPIOA->ODR ^= (1 << 4);
+  		break;
+  }
+}
+
+
+
 /* Main routine */
 int main(void)
 {
 	int d = 0;
+
+/*
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN; 	// enable the clock to GPIOC
+							//(RM0091 lists this as IOPCEN, not GPIOCEN)
+
+	GPIOA->MODER = (1 << 8);
+*/
+
+	//SysTick_Config(SystemCoreClock/100);
 
 	/* Hardware initialization */
 	RCC_Configuration();

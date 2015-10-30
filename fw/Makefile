@@ -5,9 +5,9 @@ CSRC = $(wildcard *.c )
 # CMSIS
 STM_CMSIS = ../libs/STM32F0xx
 INCLUDES = -I$(STM_CMSIS)/cmsis -I$(STM_CMSIS)/cmsis_boot
-#CSRC += $(wildcard $(STM_CMSIS)/cmsis_boot/*.c $(STM_CMSIS)/cmsis_boot/startup/*.c $(STM_CMSIS)/cmsis/*.c)
 CSRC += $(wildcard $(STM_CMSIS)/cmsis_boot/*.c $(STM_CMSIS)/cmsis/*.c)
-ASMSRC = $(STM_CMSIS)/cmsis_boot/startup/startup_stm32f030.s
+CSRC += $(wildcard $(STM_CMSIS)/cmsis_boot/startup/*.c)
+#ASMSRC = $(STM_CMSIS)/cmsis_boot/startup/startup_stm32f030.s
 
  
 # Stm32 standart periferal library
