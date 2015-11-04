@@ -1,0 +1,9 @@
+build
+output
+output_elf
+*~
+.*
+!.gitignore
+!.project
+!.cproject
+!.settings
