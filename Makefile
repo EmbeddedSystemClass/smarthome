@@ -1,7 +1,7 @@
 -include Makefile.inc.linux
 -include system.config
 
-TARGETS = fw
+TARGETS = fw iap
 BUILDDIR = build
 
 .PHONY: all $(TARGETS) clean distclean help
@@ -19,8 +19,6 @@ $(TARGETS):
 clean: $(TARGETS)
 
 distclean:
-	rm -f shared/config.h
-	rm -rf build output
 	rm -rf build output output_elf
 
 output: $(TARGETS)

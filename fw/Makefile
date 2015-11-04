@@ -4,9 +4,9 @@ CSRC = $(wildcard *.c )
 
 # CMSIS
 STM_CMSIS = ../libs/STM32F0xx
-INCLUDES = -I$(STM_CMSIS)/cmsis -I$(STM_CMSIS)/cmsis_boot
-CSRC += $(wildcard $(STM_CMSIS)/cmsis_boot/*.c $(STM_CMSIS)/cmsis/*.c)
-CSRC += $(wildcard $(STM_CMSIS)/cmsis_boot/startup/*.c)
+INCLUDES = -I./cmsis -I./cmsis_boot
+CSRC += $(wildcard ./cmsis_boot/*.c ./cmsis/*.c)
+CSRC += $(wildcard ./cmsis_boot/startup/*.c)
 #ASMSRC = 
 
  
@@ -29,10 +29,8 @@ CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_usart.c)
 CFLAGS = -DUSE_STDPERIPH_DRIVER
 
 # MCU family setup
-LDSCRIPT = $(STM_CMSIS)/cmsis_boot/stm32f030.ld
+LDSCRIPT = ./cmsis_boot/stm32f030.ld
 CFLAGS += -DSTM32F030
-#LDSCRIPT = $(STM_CMSIS)/cmsis_boot/stm32l152rb.ld
-#CFLAGS += -DSTM32F10X_MD_VL
 
 
 BUILDDIR = ../build/$(TARGET)
