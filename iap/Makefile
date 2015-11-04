@@ -1,12 +1,13 @@
-TARGET = fw
+TARGET = iap
 
-CSRC = $(wildcard *.c )
+CSRC = $(wildcard src/*.c )
+INCLUDES = -I./inc
 
 # CMSIS
 STM_CMSIS = ../libs/STM32F0xx
-INCLUDES = -I$(STM_CMSIS)/cmsis -I$(STM_CMSIS)/cmsis_boot
-CSRC += $(wildcard $(STM_CMSIS)/cmsis_boot/*.c $(STM_CMSIS)/cmsis/*.c)
-CSRC += $(wildcard $(STM_CMSIS)/cmsis_boot/startup/*.c)
+INCLUDES += -I./cmsis -I./cmsis_boot
+CSRC += $(wildcard ./cmsis_boot/*.c ./cmsis/*.c)
+CSRC += $(wildcard ./cmsis_boot/startup/*.c)
 #ASMSRC = 
 
  
@@ -18,21 +19,17 @@ INCLUDES += -I$(STM_SPL_INC)
 # Here should be added used parts of SPL 
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_gpio.c)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_rcc.c)
-CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_spi.c)
+#CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_spi.c)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_misc.c)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_usart.c)
+CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_flash.c)
 
-# FreeRTOS
-#INCLUDES +=  -I../libs/FreeRTOS/Source/include -I../libs/FreeRTOS/Source/portable/GCC/ARM_CM3
-#CSRC += $(wildcard ../libs/FreeRTOS/Source/*.c ../libs/FreeRTOS/Source/portable/GCC/ARM_CM3/*.c ../libs/FreeRTOS/Source/portable/GCC/MemMang/*.c)
 
 CFLAGS = -DUSE_STDPERIPH_DRIVER
 
 # MCU family setup
-LDSCRIPT = $(STM_CMSIS)/cmsis_boot/stm32f030.ld
+LDSCRIPT = ./cmsis_boot/stm32f030.ld
 CFLAGS += -DSTM32F030
-#LDSCRIPT = $(STM_CMSIS)/cmsis_boot/stm32l152rb.ld
-#CFLAGS += -DSTM32F10X_MD_VL
 
 
 BUILDDIR = ../build/$(TARGET)

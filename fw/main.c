@@ -15,6 +15,7 @@
 
 #define DEBUG
 
+#define APPLICATION_ADDRESS     (uint32_t)0x8001C00
 
 /* My address */
 uint8_t MyAddress[] = {
@@ -74,6 +75,26 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    /* Try to config SWD port */
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource13, GPIO_AF_0);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource14, GPIO_AF_0);
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+
 }
 
 
@@ -93,6 +114,40 @@ void RCC_Configuration(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_DBGMCU, ENABLE);
+/*
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOD, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOF, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_TS, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_FLITF, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_SRAM, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM16, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM17, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_DBGMCU, ENABLE);
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM14, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_WWDG, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_CEC, ENABLE);
+	*/
 }
 
 
@@ -201,10 +256,24 @@ void SysTick_Handler(void) {
 
 
 
+__IO uint32_t VectorTable[48] __attribute__((section(".RAMVectorTable")));
+
+
 /* Main routine */
 int main(void)
 {
-	int d = 0;
+	int i, d = 0;
+
+
+	/* Relocate by software the vector table to the internal SRAM at 0x20000000 ***/
+
+	  /* Copy the vector table from the Flash (mapped at the base of the application
+	     load address 0x08003000) to the base address of the SRAM at 0x20000000. */
+	  for(i = 0; i < 48; i++)
+	  {
+	    VectorTable[i] = *(__IO uint32_t*)(APPLICATION_ADDRESS + (i<<2));
+	  }
+
 
 /*
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN; 	// enable the clock to GPIOC
