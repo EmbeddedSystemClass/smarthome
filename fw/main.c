@@ -4,14 +4,15 @@
 #include "stm32f0xx_spi.h"
 #include "stm32f0xx_usart.h"
 #include "stm32f0xx_misc.h"
+#include "stm32f0xx_syscfg.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include "tm_stm32f4_nrf24l01.h"
+#include "led.h"
+#include "printf.h"
 
-#define 	LED1_ON 	GPIO_SetBits(GPIOA, GPIO_Pin_4)
-#define 	LED1_OFF 	GPIO_ResetBits(GPIOA, GPIO_Pin_4)
-//#define 	LED2_ON 	GPIO_SetBits(GPIOA, GPIO_Pin_3)
-//#define 	LED2_OFF 	GPIO_ResetBits(GPIOA, GPIO_Pin_3)
+
 
 #define DEBUG
 
@@ -179,7 +180,7 @@ void NVIC_Configuration(void)
 {
   NVIC_InitTypeDef NVIC_InitStructure;
 
-  /* Enable the USART2 Interrupt */
+  /* Enable the USART1 Interrupt */
 #ifdef DEBUG
   NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
 #endif
@@ -207,6 +208,9 @@ void USART_Configuration(void)
 
 	/* Enable USART1 */
 	USART_Cmd(USART1, ENABLE);
+
+	/* Enable USART1 Rx interrupt */
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 }
 
 /* Print string over UART */
@@ -249,7 +253,7 @@ void SysTick_Handler(void) {
   switch (tick++) {
   	case 100:
   		tick = 0;
-  		GPIOA->ODR ^= (1 << 4);
+  		//GPIOA->ODR ^= (1 << 4);
   		break;
   }
 }
@@ -262,25 +266,23 @@ __IO uint32_t VectorTable[48] __attribute__((section(".RAMVectorTable")));
 /* Main routine */
 int main(void)
 {
-	int i, d = 0;
+	int i, d, nbytes = 0;
+	char data[16] = {'\0'};
 
 
 	/* Relocate by software the vector table to the internal SRAM at 0x20000000 ***/
 
-	  /* Copy the vector table from the Flash (mapped at the base of the application
-	     load address 0x08003000) to the base address of the SRAM at 0x20000000. */
-	  for(i = 0; i < 48; i++)
-	  {
-	    VectorTable[i] = *(__IO uint32_t*)(APPLICATION_ADDRESS + (i<<2));
-	  }
+	/* Copy the vector table from the Flash (mapped at the base of the application
+	 load address 0x08003000) to the base address of the SRAM at 0x20000000. */
+	for(i = 0; i < 48; i++)
+	{
+	VectorTable[i] = *(__IO uint32_t*)(APPLICATION_ADDRESS + (i<<2));
+	}
 
-
-/*
-	RCC->AHBENR |= RCC_AHBENR_GPIOAEN; 	// enable the clock to GPIOC
-							//(RM0091 lists this as IOPCEN, not GPIOCEN)
-
-	GPIOA->MODER = (1 << 8);
-*/
+	/* Enable the SYSCFG peripheral clock*/
+	RCC_APB2PeriphResetCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+	/* Remap SRAM at 0x00000000 */
+	SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_SRAM);
 
 	//SysTick_Config(SystemCoreClock/100);
 
@@ -312,15 +314,27 @@ int main(void)
 	/* Set TX address, 5 bytes */
 	TM_NRF24L01_SetTxAddress(TxAddress);
 
+    __enable_irq();
 
     while(1)
     {
-    	LED1_ON;
+
+    	UART_PrintStr("!");
+
+    	if ((nbytes = GetBufDataCount()) > 0) {
+    		ReadBuf(data, nbytes);
+
+    		if (strncmp(data, "r", 1) == 0) {
+    			NVIC_SystemReset();
+    		}
+
+    		UART_PrintStr(data);
+    	}
+
     	delay(1000);
     	LED1_OFF;
-    	delay(1000);
-    	UART_PrintStr("!");
-#if 0
+
+//#if 0
 		/* Fill data with something */
 		//sprintf((char *)dataOut, "abcdefghijklmnoszxABCDEFCBDA");
 
@@ -334,12 +348,19 @@ int main(void)
 
 		do {
 			transmissionStatus = TM_NRF24L01_GetTransmissionStatus();
+			uint8_t status = TM_NRF24L01_GetStatus();
+
+			UART_PrintData(&status, 1);
+			UART_PrintData(&transmissionStatus, 1);
 		} while (transmissionStatus == TM_NRF24L01_Transmit_Status_Sending);
 
+		//UART_PrintStr(transmissionStatus);
+
+		UART_PrintData((unsigned char)transmissionStatus, 1);
 
 		/* Turn off led */
 		LED1_OFF;
-
+#if 0
 		/* Go back to RX mode */
 		TM_NRF24L01_PowerUpRx();
 

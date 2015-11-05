@@ -180,6 +180,15 @@ void RCC_Configuration(void)
 
 }
 
+void delay(uint32_t time)
+{
+	volatile uint32_t i = time * 1000;
+
+	while (i) {
+		i--;
+	}
+}
+
 /**
   * @brief  Main program.
   * @param  None
@@ -195,13 +204,32 @@ int main(void)
      */ 
 
   RCC_Configuration();
+  USART_Configuration();
+  GPIO_Configuration();
+
+  uint8_t key = 0, download_flag = 0;
+  volatile unsigned int pause = 70;
+
+  /* Waiting for user input */
+  while (pause)
+  {
+    if (SerialKeyPressed((uint8_t*)&key)) {
+    	if ( key == 'p' ) {
+    		/* FW upgra */
+    		download_flag = 1;
+    		break;
+    	}
+    }
+    pause--;
+    delay(100);
+  }
 
   /* Initialize Key Button mounted on STM320518-EVAL board */       
   //STM_EVAL_PBInit(BUTTON_KEY, BUTTON_MODE_GPIO);
 
   /* Test if Key push-button on STM320518-EVAL Board is pressed */
   //if (STM_EVAL_PBGetState(BUTTON_KEY) == 0x00)
-  if (1)
+  if (download_flag)
   { 
     /* If Key is pressed, execute the IAP driver in order to re-program the Flash */
     IAP_Init();
@@ -240,15 +268,10 @@ int main(void)
   */
 void IAP_Init(void)
 {
- USART_InitTypeDef USART_InitStructure;
+  USART_InitTypeDef USART_InitStructure;
 
   /* Unlock the Flash Program Erase controller */
   FLASH_If_Init();
-
-  USART_Configuration();
-
-  GPIO_Configuration();
-
 }
 
 

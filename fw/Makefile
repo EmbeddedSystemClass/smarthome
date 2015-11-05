@@ -5,9 +5,11 @@ CSRC = $(wildcard *.c )
 # CMSIS
 STM_CMSIS = ../libs/STM32F0xx
 INCLUDES = -I./cmsis -I./cmsis_boot
+INCLUDES += -I../libs/printf
 CSRC += $(wildcard ./cmsis_boot/*.c ./cmsis/*.c)
-CSRC += $(wildcard ./cmsis_boot/startup/*.c)
-#ASMSRC = 
+CSRC += $(wildcard ../libs/printf/*.c)
+#CSRC += $(wildcard ./cmsis_boot/startup/*.c)
+ASMSRC = $(wildcard ./cmsis_boot/startup/*.s)
 
  
 # Stm32 standart periferal library
@@ -21,6 +23,8 @@ CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_rcc.c)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_spi.c)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_misc.c)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_usart.c)
+CSRC += $(wildcard $(STM_SPL_SRC)/stm32f0xx_syscfg.c)
+
 
 # FreeRTOS
 #INCLUDES +=  -I../libs/FreeRTOS/Source/include -I../libs/FreeRTOS/Source/portable/GCC/ARM_CM3
