@@ -16,4 +16,15 @@
 
 // GPIO_Pin_10 is IRQ
 
+//Change TIM1 pins. This pins are used to PWM output channels
+#define TIM1_PORT					GPIOA
+#define TIM1_CH1_PIN				GPIO_Pin_8
+#define TIM1_CH2_PIN				GPIO_Pin_9
+#define TIM1_CH3_PIN				GPIO_Pin_10
+
+//Change LEDs pins. This pins are used to control LEDs
+#define LED1_PORT					GPIOA
+#define LED1_PIN					GPIO_Pin_4
+
+
 #endif /* DEFINES_H_ */

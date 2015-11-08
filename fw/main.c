@@ -5,13 +5,13 @@
 #include "stm32f0xx_usart.h"
 #include "stm32f0xx_misc.h"
 #include "stm32f0xx_syscfg.h"
+#include "stm32f0xx_tim.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include "tm_stm32f4_nrf24l01.h"
 #include "led.h"
 #include "printf.h"
-
 
 
 #define DEBUG
@@ -43,11 +43,11 @@ void GPIO_Configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
+    /* Configure USART TX & RX (PA.02),(PA.03)
+     * as alternate function push-pull */
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_1);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);
 
-    /* Configure SPI CLK (PA.05), SPI MOSI (PA.07)
-     * as alternate function push-pull */
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_2;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -55,8 +55,12 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-    /* Configure SPI CLK (PA.05), SPI MOSI (PA.07)
+    /* Configure SPI CLK (PA.05), SPI MOSI (PA.07), SPI MISO (PA.06)
      * as alternate function push-pull */
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_0);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource6, GPIO_AF_0);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_0);
+
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_6;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -71,13 +75,24 @@ void GPIO_Configuration(void)
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 	*/
 
-    /* Configure LEDs (PA.4) */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | NRF24L01_CSN_PIN | NRF24L01_CE_PIN;
+    /* Configure output pins */
+    GPIO_InitStructure.GPIO_Pin = LED1_PIN | NRF24L01_CSN_PIN | NRF24L01_CE_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-    /* Try to config SWD port */
+    /* Configure TIM1 channels output, used to PWM channels */
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_2);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_2);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_2);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    /* Configure SWD port */
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource13, GPIO_AF_0);
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource14, GPIO_AF_0);
 
@@ -94,7 +109,6 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-
 
 }
 
@@ -115,7 +129,11 @@ void RCC_Configuration(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_DBGMCU, ENABLE);
-/*
+
+	/* TIM1 clock enable */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1 , ENABLE);
+
+#if 0
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOD, ENABLE);
@@ -148,7 +166,7 @@ void RCC_Configuration(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_CEC, ENABLE);
-	*/
+#endif
 }
 
 
@@ -259,6 +277,73 @@ void SysTick_Handler(void) {
 }
 
 
+void PWM_Configuration(void){
+
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	TIM_OCInitTypeDef  TIM_OCInitStructure;
+	uint16_t TimerPeriod = 0;
+	uint16_t Channel1Pulse = 0, Channel2Pulse = 0, Channel3Pulse = 0, Channel4Pulse = 0;
+
+	/* Compute the value to be set in ARR regiter to generate signal frequency at 17.57 Khz */
+	TimerPeriod = (SystemCoreClock / 17570 ) - 1;
+	/* Compute CCR1 value to generate a duty cycle at 50% for channel 1 */
+	Channel1Pulse = (uint16_t) (((uint32_t) 5 * (TimerPeriod - 1)) / 10);
+	/* Compute CCR2 value to generate a duty cycle at 37.5%  for channel 2 */
+	Channel2Pulse = (uint16_t) (((uint32_t) 375 * (TimerPeriod - 1)) / 1000);
+	/* Compute CCR3 value to generate a duty cycle at 25%  for channel 3 */
+	Channel3Pulse = (uint16_t) (((uint32_t) 25 * (TimerPeriod - 1)) / 100);
+
+	/* TIM1 clock enable */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1 , ENABLE);
+
+	/* Time Base configuration */
+	TIM_TimeBaseStructure.TIM_Prescaler = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseStructure.TIM_Period = TimerPeriod;
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+
+	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
+
+	/* Channel 1, 2, 3 and 4 Configuration in PWM mode */
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
+	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_High;
+	TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
+	TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCIdleState_Reset;
+
+	TIM_OCInitStructure.TIM_Pulse = Channel1Pulse;
+	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
+
+	TIM_OCInitStructure.TIM_Pulse = Channel2Pulse;
+	TIM_OC2Init(TIM1, &TIM_OCInitStructure);
+
+	TIM_OCInitStructure.TIM_Pulse = Channel3Pulse;
+	TIM_OC3Init(TIM1, &TIM_OCInitStructure);
+
+	/* TIM1 counter enable */
+	TIM_Cmd(TIM1, ENABLE);
+
+	/* TIM1 Main Output Enable */
+	TIM_CtrlPWMOutputs(TIM1, ENABLE);
+
+}
+
+void PWM_SetDuty(unsigned char channel, unsigned char duty) {
+	unsigned int pulse = 0;
+
+	if ( duty > 100 ) duty = 100;
+
+	pulse = (uint16_t) (((uint32_t) duty * ((SystemCoreClock / 17570 ) - 1 - 1)) / 100);
+
+	switch (channel) {
+		case 1: TIM1->CCR1 = duty; break;
+		case 2: TIM1->CCR2 = duty; break;
+		case 3: TIM1->CCR3 = duty; break;
+	}
+}
 
 __IO uint32_t VectorTable[48] __attribute__((section(".RAMVectorTable")));
 
@@ -291,13 +376,18 @@ int main(void)
 	GPIO_Configuration();
 	SPI_Configuration();
 	NVIC_Configuration();
+	PWM_Configuration();
+
+	PWM_SetDuty(1, 50);
+	PWM_SetDuty(2, 37);
+	PWM_SetDuty(3, 25);
+
 
 #ifdef DEBUG
 	USART_Configuration();
 	UART_PrintStr("Hello\n");
 #endif
 
-	//LED2_ON;
 
 	TM_NRF24L01_Transmit_Status_t transmissionStatus;
 
@@ -334,7 +424,10 @@ int main(void)
     	delay(1000);
     	LED1_OFF;
 
-//#if 0
+    	if ( d > 100 ) d = 0;
+    	PWM_SetDuty(2, d+5);
+
+#if 0
 		/* Fill data with something */
 		//sprintf((char *)dataOut, "abcdefghijklmnoszxABCDEFCBDA");
 
@@ -360,7 +453,7 @@ int main(void)
 
 		/* Turn off led */
 		LED1_OFF;
-#if 0
+//#if 0
 		/* Go back to RX mode */
 		TM_NRF24L01_PowerUpRx();
 

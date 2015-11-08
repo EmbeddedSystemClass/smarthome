@@ -10,9 +10,10 @@
 
 #include "stm32f0xx.h"
 #include "stm32f0xx_gpio.h"
+#include "defines.h"
 
-#define 	LED1_ON 	GPIO_SetBits(GPIOA, GPIO_Pin_4)
-#define 	LED1_OFF 	GPIO_ResetBits(GPIOA, GPIO_Pin_4)
+#define 	LED1_ON 	GPIO_SetBits(LED1_PORT, LED1_PIN)
+#define 	LED1_OFF 	GPIO_ResetBits(LED1_PORT, LED1_PIN)
 //#define 	LED2_ON 	GPIO_SetBits(GPIOA, GPIO_Pin_3)
 //#define 	LED2_OFF 	GPIO_ResetBits(GPIOA, GPIO_Pin_3)
 
