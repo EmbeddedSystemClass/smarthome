@@ -2,9 +2,16 @@
 
 #include <stm32f0xx.h>
 
+
 extern void _estack(void);  // to force type checking
 void Reset_Handler(void);
-void default_handler (void) { while(1); }
+void default_handler (void) {
+	/* Perform software reset */
+	__DSB();
+	SCB->AIRCR  = ((0x5FA << SCB_AIRCR_VECTKEY_Pos) | SCB_AIRCR_SYSRESETREQ_Msk);
+	__DSB();
+	while(1);
+}
 
 void __attribute__ ((weak)) __libc_init_array(void){}
 
