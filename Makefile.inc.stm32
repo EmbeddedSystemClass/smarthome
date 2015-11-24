@@ -5,8 +5,7 @@ ELFOUTPUTDIR = $(BUILDDIR)/../../output_elf
 DEPDIR = $(BUILDDIR)/.dep
 PWD = $(shell pwd)
 
-#COMMONFLAGS = -mcpu=cortex-m3 -mthumb
-COMMONFLAGS = -mcpu=cortex-m0 -mthumb
+
 CFLAGS += $(COMMONFLAGS) -Os $(INCLUDES) -I.
 CFLAGS += -std=c99 -Wall -Wextra -static -fdata-sections -ffunction-sections -fno-hosted -fno-builtin
 CFLAGS += -nostdlib -nodefaultlibs

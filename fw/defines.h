@@ -8,23 +8,23 @@
 
 //Change CSN pin. This is for SPI communication
 #define NRF24L01_CSN_PORT			GPIOA
-#define NRF24L01_CSN_PIN			GPIO_Pin_13
+#define NRF24L01_CSN_PIN			GPIO_Pin_1
 
 //Change CE pin. This pin is used to enable/disable transmitter/receiver functionality
 #define NRF24L01_CE_PORT			GPIOA
-#define NRF24L01_CE_PIN				GPIO_Pin_14
+#define NRF24L01_CE_PIN				GPIO_Pin_0
 
 // GPIO_Pin_10 is IRQ
 
 //Change TIM1 pins. This pins are used to PWM output channels
 #define TIM1_PORT					GPIOA
-#define TIM1_CH1_PIN				GPIO_Pin_8
+//#define TIM1_CH1_PIN				GPIO_Pin_8
 #define TIM1_CH2_PIN				GPIO_Pin_9
 #define TIM1_CH3_PIN				GPIO_Pin_10
 
 //Change LEDs pins. This pins are used to control LEDs
-#define LED1_PORT					GPIOA
-#define LED1_PIN					GPIO_Pin_4
+#define LED1_PORT					GPIOB
+#define LED1_PIN					GPIO_Pin_1
 
 
 #endif /* DEFINES_H_ */

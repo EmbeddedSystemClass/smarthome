@@ -30,6 +30,7 @@ CFLAGS = -DUSE_STDPERIPH_DRIVER
 # MCU family setup
 LDSCRIPT = ./cmsis_boot/stm32f030.ld
 CFLAGS += -DSTM32F030
+COMMONFLAGS = -mcpu=cortex-m0 -mthumb
 
 
 BUILDDIR = ../build/$(TARGET)

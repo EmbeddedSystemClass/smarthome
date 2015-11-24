@@ -81,11 +81,18 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
+    /* Configure output leds */
+    GPIO_InitStructure.GPIO_Pin = LED1_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(LED1_PORT, &GPIO_InitStructure);
+
     /* Configure TIM1 channels output, used to PWM channels */
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_2);
+    //GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_2);
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_2);
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_2);
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
+    //GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
@@ -93,6 +100,7 @@ void GPIO_Configuration(void)
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     /* Configure SWD port */
+ /*
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource13, GPIO_AF_0);
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource14, GPIO_AF_0);
 
@@ -109,7 +117,7 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-
+*/
 }
 
 
@@ -422,12 +430,12 @@ int main(void)
     	}
 
     	delay(1000);
-    	LED1_OFF;
+    	//LED1_OFF;
 
     	if ( d > 100 ) d = 0;
     	PWM_SetDuty(2, d+5);
 
-#if 0
+
 		/* Fill data with something */
 		//sprintf((char *)dataOut, "abcdefghijklmnoszxABCDEFCBDA");
 
@@ -453,7 +461,7 @@ int main(void)
 
 		/* Turn off led */
 		LED1_OFF;
-//#if 0
+#if 0
 		/* Go back to RX mode */
 		TM_NRF24L01_PowerUpRx();
 

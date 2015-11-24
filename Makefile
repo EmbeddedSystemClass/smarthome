@@ -1,7 +1,7 @@
 -include Makefile.inc.linux
 -include system.config
 
-TARGETS = fw iap
+TARGETS = fw iap ctrl
 BUILDDIR = build
 
 .PHONY: all $(TARGETS) clean distclean help

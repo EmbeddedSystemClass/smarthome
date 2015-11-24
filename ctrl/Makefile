@@ -7,9 +7,11 @@ STM_CMSIS = ../libs/STM32F1xx
 INCLUDES = -I./cmsis -I./cmsis_boot
 INCLUDES += -I../libs/printf
 INCLUDES += -I../libs/fifo
+INCLUDES += -I../libs/nrf24l01/stm32f1
 CSRC += $(wildcard ./cmsis_boot/*.c ./cmsis/*.c)
 CSRC += $(wildcard ../libs/printf/*.c)
 CSRC += $(wildcard ../libs/fifo/*.c)
+CSRC += $(wildcard ../libs/nrf24l01/stm32f1/*.c)
 CSRC += $(wildcard ./cmsis_boot/startup/*.c)
 #ASMSRC = $(wildcard ./cmsis_boot/startup/*.s)
 
@@ -26,6 +28,7 @@ CSRC += $(wildcard $(STM_SPL_SRC)/stm32f10x_spi.c)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f10x_misc.c)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f10x_usart.c)
 CSRC += $(wildcard $(STM_SPL_SRC)/stm32f10x_tim.c)
+CSRC += $(wildcard $(STM_SPL_SRC)/misc.c)
 
 
 # FreeRTOS

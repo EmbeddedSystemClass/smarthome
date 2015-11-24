@@ -22,9 +22,9 @@ void USART2_IRQHandler(void)
 	//if ((USART3->SR & USART_FLAG_RXNE) != (u16)RESET)
 
 	// check if the USART1 receive interrupt flag was set
-	if( USART_GetITStatus(USART1, USART_IT_RXNE) ){
+	if( USART_GetITStatus(USART2, USART_IT_RXNE) ){
 
-		buf = USART_ReceiveData(USART1);
+		buf = USART_ReceiveData(USART2);
 
 	}
 

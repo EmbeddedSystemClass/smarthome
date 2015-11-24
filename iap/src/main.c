@@ -80,6 +80,7 @@ void GPIO_Configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
+#if 0
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_1);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);
 
@@ -98,7 +99,7 @@ void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-
+#endif
     /* Configure SPI MISO (PA.06)
      * as alternate function push-pull */
     /*
@@ -268,8 +269,6 @@ int main(void)
   */
 void IAP_Init(void)
 {
-  USART_InitTypeDef USART_InitStructure;
-
   /* Unlock the Flash Program Erase controller */
   FLASH_If_Init();
 }
