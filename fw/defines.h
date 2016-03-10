@@ -7,12 +7,12 @@
 //#define NRF24L01_SPI_PINS			TM_SPI_PinsPack_2
 
 //Change CSN pin. This is for SPI communication
-#define NRF24L01_CSN_PORT			GPIOA
+#define NRF24L01_CSN_PORT			GPIOC
 #define NRF24L01_CSN_PIN			GPIO_Pin_1
 
 //Change CE pin. This pin is used to enable/disable transmitter/receiver functionality
-#define NRF24L01_CE_PORT			GPIOA
-#define NRF24L01_CE_PIN				GPIO_Pin_0
+#define NRF24L01_CE_PORT			GPIOC
+#define NRF24L01_CE_PIN				GPIO_Pin_2
 
 // GPIO_Pin_10 is IRQ
 

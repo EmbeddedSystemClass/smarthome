@@ -7,30 +7,340 @@
 #include "printf.h"
 #include "led.h"
 #include "defines.h"
-#include "tm_stm32f4_nrf24l01.h"
+#include "stm32_nrf24l01.h"
 
-#define DEBUG
+#define APB2PeripheralClkEnabled ( RCC_APB2Periph_GPIOA    |   \
+								   RCC_APB2Periph_GPIOC    |   \
+								   RCC_APB2Periph_SPI1      )
+#define APB1PeripheralClkEnabled (RCC_APB1Periph_USART2)
 
 
+#define NRF24L01_REG_CONFIG			0x00	//Configuration Register
+#define NRF24L01_REG_EN_AA			0x01	//Enable �Auto Acknowledgment� Function
+#define NRF24L01_REG_EN_RXADDR		0x02	//Enabled RX Addresses
+#define NRF24L01_REG_SETUP_AW		0x03	//Setup of Address Widths (common for all data pipes)
+#define NRF24L01_REG_SETUP_RETR		0x04	//Setup of Automatic Retransmission
+#define NRF24L01_REG_RF_CH			0x05	//RF Channel
+
+extern uint8_t NRF24L01_ReadRegister(uint8_t reg);
+
+
+void init_RCC(void)
+{
+  RCC_APB2PeriphClockCmd(APB2PeripheralClkEnabled, ENABLE);
+  RCC_APB1PeriphClockCmd(APB1PeripheralClkEnabled, ENABLE);
+}
+
+/* RCC_Configuration */
+void RCC_Configuration(void)
+{
+	/* Enable USART2 */
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+	/* Enable GPIOC, GPIOA */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOA | RCC_APB2Periph_SPI1, ENABLE);
+}
+
+void init_GPIO(void)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+  GPIO_StructInit(&GPIO_InitStructure);
+
+// инициализация светодиодов и прочего вырезана
+	/* Configure USART2 Tx (PA.02) as alternate function push-pull */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	/* Configure USART2 Rx (PA.03) as input floating */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    /* Configure LEDs (PC.8, PC.9) */
+    GPIO_InitStructure.GPIO_Pin = LED1_PIN | LED2_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(LED_PORT, &GPIO_InitStructure);
+
+  // init SPI1-NRF24L01+
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+   GPIO_InitStructure.GPIO_Pin = SPI_SCK_PIN | SPI_MOSI_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+   GPIO_InitStructure.GPIO_Pin = SPI_CS_PIN;
+   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+   GPIO_Init(SPI_GPIO_PORT,&GPIO_InitStructure);
+
+  GPIO_InitStructure.GPIO_Pin = (NRF24L01_CE_PIN);
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(NRF24L01_CE_PORT, &GPIO_InitStructure);
+/*
+   GPIO_InitStructure.GPIO_Pin = NRF24L01_IRQ_PIN;
+   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+   GPIO_Init(NRF24L01_IRQ_PORT,&GPIO_InitStructure);
+*/
+  GPIO_InitStructure.GPIO_Pin = SPI_MISO_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  GPIO_Init(SPI_GPIO_PORT, &GPIO_InitStructure);
+}
+
+void init_SPI(void)
+{
+   SPI_InitTypeDef SPI_InitStructure;
+   SPI_StructInit(&SPI_InitStructure);
+   SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+   SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
+   SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+   SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+   SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
+   SPI_InitStructure.SPI_CRCPolynomial = 7;
+   SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
+   SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+   SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+   SPI_Init(NRF24L01_SPI,&SPI_InitStructure);
+   // NSS must be set to '1' due to NSS_Soft settings (otherwise it will be Multimaster mode).
+   SPI_NSSInternalSoftwareConfig(NRF24L01_SPI,SPI_NSSInternalSoft_Set);
+   NRF24L01_CSN_HIGH;
+   NRF24L01_CE_LOW;
+   SPI_Cmd(NRF24L01_SPI,ENABLE);
+}
+
+void delay_(uint32_t dl)
+{
+volatile uint32_t delaycount;
+   delaycount = dl;
+   while(delaycount)
+   {
+      delaycount--;
+   }
+}
+
+void retranslate(void)
+{
+/* Receiver address */
+uint8_t TxAddress[] = {
+   0xE7,
+   0xE7,
+   0xE7,
+   0xE7,
+   0xE7
+};
 /* My address */
 uint8_t MyAddress[] = {
-    0xE7,
-    0xE7,
-    0xE7,
-    0xE7,
-    0xE7
+   0x7E,
+   0x7E,
+   0x7E,
+   0x7E,
+   0x7E
+};
+
+
+uint8_t dataIn[32];
+NRF24L01_Transmit_Status_t transmissionStatus;
+   /* Initialize NRF24L01+ on channel 15 and 32bytes of payload */
+   /* By default 2Mbps data rate and 0dBm output power */
+   /* NRF24L01 goes to RX mode by default */
+   NRF24L01_Init(15, 32);
+
+   /* Set RF settings, Data rate to 2Mbps, Output power to -18dBm */
+   NRF24L01_SetRF(NRF24L01_DataRate_2M, NRF24L01_OutputPower_M18dBm);
+
+   /* Set my address, 5 bytes */
+   NRF24L01_SetMyAddress(MyAddress);
+   /* Set TX address, 5 bytes */
+   NRF24L01_SetTxAddress(TxAddress);
+
+   LED1_ON;
+   delay_(3600000);
+   LED1_OFF;
+      while (1)
+      {
+      /* If data is ready on NRF24L01+ */
+      if (NRF24L01_DataReady())
+         {
+            /* Get data from NRF24L01+ */
+            NRF24L01_GetData(dataIn);
+
+            delay_(36000);
+
+            /* Send it back, automatically goes to TX mode */
+            NRF24L01_Transmit(dataIn);
+
+            /* Start send */
+            LED1_ON;;
+            delay_(360000);
+            /* Wait for data to be sent */
+            do {
+               transmissionStatus = NRF24L01_GetTransmissionStatus();
+            } while (transmissionStatus == NRF24L01_Transmit_Status_Sending);
+            /* Send done */
+            LED1_OFF;
+
+            /* Go back to RX Mode */
+            NRF24L01_PowerUpRx();
+         }
+      }
+
+}
+
+void transmitter(void)
+{
+/* My address */
+uint8_t MyAddress[] = {
+   0xE7,
+   0xE7,
+   0xE7,
+   0xE7,
+   0xE7
 };
 /* Receiver address */
 uint8_t TxAddress[] = {
-    0x7E,
-    0x7E,
-    0x7E,
-    0x7E,
-    0x7E
+   0x7E,
+   0x7E,
+   0x7E,
+   0x7E,
+   0x7E
 };
+uint8_t dataOut[32], dataIn[32], i;
+uint32_t tr_count;
+NRF24L01_Transmit_Status_t transmissionStatus;
 
-uint8_t dataOut[32] = "abcdefghijklmnoszxABCDEFCBDA", dataIn[32];
+   /* Initialize NRF24L01+ on channel 15 and 32bytes of payload */
+   /* By default 2Mbps data rate and 0dBm output power */
+   /* NRF24L01 goes to RX mode by default */
+   NRF24L01_Init(15, 32);
 
+   /* Set RF settings, Data rate to 2Mbps, Output power to -18dBm */
+   NRF24L01_SetRF(NRF24L01_DataRate_2M, NRF24L01_OutputPower_M18dBm);
+
+   /* Set my address, 5 bytes */
+   //NRF24L01_SetMyAddress(MyAddress);
+   /* Set TX address, 5 bytes */
+   //NRF24L01_SetTxAddress(TxAddress);
+
+   uint8_t reg;
+
+   delay_(720000);
+
+
+	reg = NRF24L01_ReadRegister(NRF24L01_REG_CONFIG);
+	printf("NRF24L01_REG_CONFIG: 0x%X\r\n", reg);
+
+	reg = NRF24L01_ReadRegister(NRF24L01_REG_EN_RXADDR);
+	printf("NRF24L01_REG_EN_RXADDR: 0x%X\r\n", reg);
+
+	reg = NRF24L01_ReadRegister(NRF24L01_REG_RF_CH);
+	printf("NRF24L01_REG_RF_CH: 0x%X\r\n", reg);
+
+	reg = NRF24L01_ReadRegister(NRF24L01_REG_CONFIG);
+	printf("NRF24L01_REG_CONFIG: 0x%X\r\n", reg);
+
+	reg = NRF24L01_ReadRegister(NRF24L01_REG_RF_CH);
+		printf("NRF24L01_REG_RF_CH: 0x%X\r\n", reg);
+
+		reg = NRF24L01_ReadRegister(NRF24L01_REG_CONFIG);
+			printf("NRF24L01_REG_CONFIG: 0x%X\r\n", reg);
+
+	delay_(720000);
+
+   for (i = 0; i < 32; i++)
+   {
+      dataOut[i] = i + 30;
+      dataIn[i] = 0;
+   }
+while (1) {
+         /* Transmit data, goes automatically to TX mode */
+         NRF24L01_Transmit(dataOut);
+         /* Turn on led to indicate sending */
+         LED2_ON;
+         /* Wait for data to be sent */
+         do {
+            transmissionStatus = NRF24L01_GetTransmissionStatus();
+
+            printf("transmissionStatus: %d\r\n", transmissionStatus);
+            delay_(72000);
+
+         } while (transmissionStatus == NRF24L01_Transmit_Status_Sending);
+         /* Turn off led */
+         LED2_OFF;
+
+         /* Go back to RX mode */
+         NRF24L01_PowerUpRx();
+         i = 0;
+
+
+
+         uint8_t status = NRF24L01_GetStatus();
+         printf("status: %d\r\n", status);
+
+         /* Wait received data, wait max 100ms, if time is larger, then data were probably lost */
+         while (!NRF24L01_DataReady())
+         {
+            delay_(720000);
+            i++;
+            printf("TM_NRF24L01_DataReady\r\n");
+            if( i > 100) break;
+         }
+
+         /* Get data from NRF2L01+ */
+         NRF24L01_GetData(dataIn);
+
+         printf("dataIn: %s\r\n", dataIn);
+
+         /* Check transmit status */
+         if (transmissionStatus == NRF24L01_Transmit_Status_Ok)
+         {
+            tr_count++;
+            printf("tr_count: %s\r\n", tr_count);
+         }
+
+         delay_(7200000);
+      }
+}
+
+/* USART_Configuration */
+void USART_Configuration(void)
+{
+	USART_InitTypeDef USART_InitStructure;
+
+	/* Fill USART_InitStructure with default values
+	* (9600, 8 bit, 1 stop bit, no flow control) */
+	USART_StructInit(&USART_InitStructure);
+	/* Set baudrate to 115200 */
+	USART_InitStructure.USART_BaudRate = 115200;
+
+	/* Init USART2 */
+	USART_Init(USART2, &USART_InitStructure);
+
+	/* Enable USART2 */
+	USART_Cmd(USART2, ENABLE);
+
+	/* Enable USART2 Rx interrupt */
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+}
+
+
+void putc( void* p, char c)
+{
+	while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {
+			}
+	USART_SendData(USART2, c);
+}
+
+/* NVIC_Configuration */
+void NVIC_Configuration(void)
+{
+  NVIC_InitTypeDef NVIC_InitStructure;
+
+  /* Enable the USART2 Interrupt */
+  NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+  //NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  //NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+}
 
 /* GPIO_Configuration */
 void GPIO_Configuration(void)
@@ -58,7 +368,8 @@ void GPIO_Configuration(void)
     /* Configure SPI MISO (PA.06)
      * as alternate function push-pull */
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     /* Configure SCN (PC.1), CE (PC.2) */
@@ -67,6 +378,12 @@ void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
+    /* Configure SCN (PA.4) */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
     /* Configure LEDs (PC.8, PC.9) */
     GPIO_InitStructure.GPIO_Pin = LED1_PIN | LED2_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -74,210 +391,23 @@ void GPIO_Configuration(void)
     GPIO_Init(LED_PORT, &GPIO_InitStructure);
 }
 
-
-/* RCC_Configuration */
-void RCC_Configuration(void)
+void init(void)
 {
-#ifdef DEBUG
-	/* Enable USART2 */
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-#endif
-
-	/* Enable GPIOC, GPIOA */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOA | RCC_APB2Periph_SPI1, ENABLE);
+  //init_RCC();
+  /* RCC_Configuration */
+  RCC_Configuration();
+  init_GPIO();
+  init_SPI();
+  NVIC_Configuration();
+  USART_Configuration();
+  init_printf(0,putc);
 }
 
-#ifdef DEBUG
-/* USART_Configuration */
-void USART_Configuration(void)
+void main()
 {
-	USART_InitTypeDef USART_InitStructure;
-
-	/* Fill USART_InitStructure with default values
-	* (9600, 8 bit, 1 stop bit, no flow control) */
-	USART_StructInit(&USART_InitStructure);
-	/* Set baudrate to 115200 */
-	USART_InitStructure.USART_BaudRate = 115200;
-
-	/* Init USART2 */
-	USART_Init(USART2, &USART_InitStructure);
-
-	/* Enable USART2 */
-	USART_Cmd(USART2, ENABLE);
-
-	/* Enable USART2 Rx interrupt */
-	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-}
-#endif
-
-
-/* NVIC_Configuration */
-void NVIC_Configuration(void)
-{
-  NVIC_InitTypeDef NVIC_InitStructure;
-
-  /* Enable the USART2 Interrupt */
-  NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-  //NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  //NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
+	init();
+	printf("Hello!\r\n");
+	printf("Check: %d", NRF24_Check());
+	transmitter();
 }
 
-
-/* SPI configuration */
-void SPI_Configuration(void)
-{
-	SPI_InitTypeDef SPI_InitStructure;
-
-	/* OLED_SPI configuration */
-	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
-	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
-
-	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
-	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
-	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
-
-	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
-	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
-
-	SPI_Init(NRF24L01_SPI, &SPI_InitStructure);
-
-	SPI_Cmd(NRF24L01_SPI, ENABLE);
-}
-
-
-void putc( void* p, char c)
-{
-	while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {
-			}
-	USART_SendData(USART2, c);
-}
-
-
-/* Print string over UART */
-void UART_PrintStr(char *str)
-{
-	while (*str) {
-		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {
-		}
-		USART_SendData(USART2, *str++);
-	}
-}
-
-
-/* Print data over UART */
-void UART_PrintData(unsigned char *data, unsigned int n)
-{
-	char str[16];
-
-	UART_PrintStr("[ ");
-	while (n--) {
-		sprintf(str, "%d ", *data++);
-		UART_PrintStr(str);
-	}
-	UART_PrintStr("]\r\n");
-}
-
-
-void delay(uint32_t time)
-{
-	volatile uint32_t i = time * 1000;
-
-	while (i) {
-		i--;
-	}
-}
-
-
-/* Main routine */
-int main(void)
-{
-	/* Hardware initialization */
-	RCC_Configuration();
-	GPIO_Configuration();
-	NVIC_Configuration();
-	SPI_Configuration();
-	#ifdef DEBUG
-	USART_Configuration();
-	init_printf(0,putc);
-	#endif
-
-
-	TM_NRF24L01_Transmit_Status_t transmissionStatus;
-
-	/* Initialize NRF24L01+ on channel 15 and 32bytes of payload */
-	/* By default 2Mbps data rate and 0dBm output power */
-	/* NRF24L01 goes to RX mode by default */
-	TM_NRF24L01_Init(15, 32);
-
-	/* Set 2MBps data rate and -18dBm output power */
-	TM_NRF24L01_SetRF(TM_NRF24L01_DataRate_2M, TM_NRF24L01_OutputPower_M18dBm);
-
-	/* Set my address, 5 bytes */
-	TM_NRF24L01_SetMyAddress(MyAddress);
-	/* Set TX address, 5 bytes */
-	TM_NRF24L01_SetTxAddress(TxAddress);
-
-    while(1)
-    {
-    	LED1_OFF;
-    	LED2_ON;
-    	delay(1000);
-    	LED2_OFF;
-    	delay(1000);
-
-
-    	int d;
-		/* Fill data with something */
-		sprintf((char *)dataOut, "abcdefghijklmnoszxABCDEFCBDA");
-
-		/* Transmit data, goes automatically to TX mode */
-		TM_NRF24L01_Transmit(dataOut);
-
-		/* Turn on led to indicate sending */
-		LED1_ON;
-
-		/* Wait for data to be sent */
-
-		do {
-			transmissionStatus = TM_NRF24L01_GetTransmissionStatus();
-			uint8_t status = TM_NRF24L01_GetStatus();
-
-			delay(5000);
-
-			printf("status: %d\r\n", status);
-			printf("transmissionStatus: %d\r\n", transmissionStatus);
-			printf("TM_NRF24L01_GetRetransmissionsCount: %d\r\n", TM_NRF24L01_GetRetransmissionsCount());
-		} while (transmissionStatus == TM_NRF24L01_Transmit_Status_Sending);
-
-		printf("transmissionStatus 2: %d\r\n", transmissionStatus);
-
-		/* Turn off led */
-		LED1_OFF;
-
-		/* Go back to RX mode */
-		TM_NRF24L01_PowerUpRx();
-
-		/* Wait received data, wait max 100ms, if time is larger, then data were probably lost */
-		while (!TM_NRF24L01_DataReady() && (d < 10)) {
-			delay(100);
-			d++;
-		}
-		d = 0;
-
-		/* Get data from NRF2L01+ */
-		TM_NRF24L01_GetData(dataIn);
-
-		/* Check transmit status */
-		if (transmissionStatus == TM_NRF24L01_Transmit_Status_Ok) {
-
-		} else if (transmissionStatus == TM_NRF24L01_Transmit_Status_Lost) {
-
-		} else {
-
-		}
-
-    }
-}
