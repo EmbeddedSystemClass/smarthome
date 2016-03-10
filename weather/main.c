@@ -9,10 +9,12 @@
 #include "printf.h"
 #include "led.h"
 #include "defines.h"
-#include "stm32_nrf24l01.h"
+//#include "stm32_nrf24l01.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "jlx12864oled.h"
+#include "u8g.h"
+#include "u8g_arm.h"
 
 #define DEBUG
 
@@ -25,6 +27,8 @@
 #define NRF24L01_REG_RF_CH			0x05	//RF Channel
 
 extern uint8_t NRF24L01_ReadRegister(uint8_t reg);
+
+u8g_t u8g;
 
 
 /* RCC_Configuration */
@@ -66,6 +70,7 @@ void init_GPIO(void)
     GPIO_Init(LED_PORT, &GPIO_InitStructure);
 
    // init SPI1-NRF24L01+
+#if 0
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_0);
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource6, GPIO_AF_0);
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_0);
@@ -97,6 +102,7 @@ void init_GPIO(void)
    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
    GPIO_Init(SPI_GPIO_PORT, &GPIO_InitStructure);
+#endif
 
    /* LCD */
    GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_0);
@@ -139,6 +145,7 @@ void init_SPI(void)
    SPI_InitTypeDef SPI_InitStructure;
    SPI_StructInit(&SPI_InitStructure);
 
+#if 0
    /* NRF */
    SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
@@ -151,10 +158,12 @@ void init_SPI(void)
    SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
    SPI_Init(NRF24L01_SPI,&SPI_InitStructure);
    // NSS must be set to '1' due to NSS_Soft settings (otherwise it will be Multimaster mode).
-   SPI_NSSInternalSoftwareConfig(NRF24L01_SPI,SPI_NSSInternalSoft_Set);
+
    NRF24L01_CSN_HIGH;
    NRF24L01_CE_LOW;
    SPI_Cmd(NRF24L01_SPI,ENABLE);
+   SPI_NSSInternalSoftwareConfig(NRF24L01_SPI,SPI_NSSInternalSoft_Set);
+#endif
 
    /*LCD */
    SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
@@ -167,6 +176,8 @@ void init_SPI(void)
    SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
    SPI_Init(OLED_SPI,&SPI_InitStructure);
    SPI_Cmd(OLED_SPI,ENABLE);
+
+   SPI_RxFIFOThresholdConfig(OLED_SPI, SPI_RxFIFOThreshold_QF);
 }
 
 void delay_(uint32_t dl)
@@ -179,6 +190,7 @@ volatile uint32_t delaycount;
    }
 }
 
+#if 0
 void retranslate(void)
 {
 /* Receiver address */
@@ -377,6 +389,8 @@ while (1) {
          }
       }
 }
+#endif
+
 
 /* USART_Configuration */
 void USART_Configuration(void)
@@ -453,19 +467,47 @@ void task1(void *pvParameters) {
 
         for (;;) {
                 GPIO_SetBits(GPIOC, GPIO_Pin_9);
-                //LCD_PrintStr(1, 2, "Task1: Led 1 - on ");
                 vTaskDelay(1000);
                 GPIO_ResetBits(GPIOC, GPIO_Pin_9);
-                //LCD_PrintStr(1, 2, "Task1: Led 1 - off");
                 vTaskDelay(1000);
         }
+}
+
+
+
+void task2(void *pvParameters)
+{
+    uint8_t pos = 0;
+
+    u8g_SetDefaultForegroundColor(&u8g);
+    u8g_SetFont(&u8g, u8g_font_helvR12);
+
+    for(;;)
+    {
+      /* picture loop */
+      u8g_FirstPage(&u8g);
+      do
+      {
+          u8g_SetFont(&u8g, u8g_font_helvR18);
+          u8g_DrawStr(&u8g,  0, 31+pos, "Hello");
+          u8g_SetFont(&u8g, u8g_font_gdr25r);
+          u8g_DrawStr(&u8g, pos, 31, "World!");
+      } while ( u8g_NextPage(&u8g) );
+
+      /* refresh screen after some delay */
+      vTaskDelay(10);
+
+      /* update position */
+      pos++;
+      pos &= 63;
+    }
 }
 
 void main()
 {
 	init();
 	printf("Hello!\r\n");
-	printf("Check: %d", NRF24_Check());
+	//printf("Check: %d", NRF24_Check());
 	//transmitter();
 	//retranslate();
 
@@ -479,14 +521,20 @@ void main()
 	/* Queue of commands to LCD */
 	LCDCmdQueue = xQueueCreate( 5, sizeof( char ) );
 
+	u8g_InitComFn(&u8g, &u8g_dev_ssd1306_128x64_hw_spi, u8g_com_hw_spi_fn);
+
 	/* 4 tasks which print moving text banners on LCD */
-	xTaskCreate( task3, ( char * ) "Row3", configMINIMAL_STACK_SIZE, NULL, 1,
-								( xTaskHandle * ) NULL);
+	//xTaskCreate( task3, ( char * ) "Row3", configMINIMAL_STACK_SIZE, NULL, 1,
+	//							( xTaskHandle * ) NULL);
 	xTaskCreate( task1, ( char * ) "Led1", configMINIMAL_STACK_SIZE, NULL, 1,
 							( xTaskHandle * ) NULL);
+	xTaskCreate( task2, ( char * ) "glib", configMINIMAL_STACK_SIZE, NULL, 1,
+	                        ( xTaskHandle * ) NULL);
 
 	/* Start LCD gatekeeper */
-	xTaskCreate( LCD_Task, ( char * ) "LCD", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, ( xTaskHandle * ) NULL );
+	//xTaskCreate( LCD_Task, ( char * ) "LCD", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, ( xTaskHandle * ) NULL );
+
+
 
 	vTaskStartScheduler();
 

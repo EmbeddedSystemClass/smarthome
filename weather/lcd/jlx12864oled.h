@@ -55,6 +55,7 @@ void LCD_PrintStr(unsigned char row, unsigned char col, char *str);
 void LCD_ClearScreen(void);
 /* LCD initialization */
 void LCD_Init();
+void LCD_SPISend(uint8_t data);
 
 
 #endif /* __JLX12864OLED_H */

@@ -14,7 +14,7 @@ QueueHandle_t LCDDataQueue;
 QueueHandle_t LCDCmdQueue;
 
 
-static void LCD_SPISend(uint8_t data);
+//static void LCD_SPISend(uint8_t data);
 static void LCD_WriteCmd(unsigned char cmd);
 static void LCD_WriteData(unsigned char cmd);
 static void LCD_SetAddr(unsigned char page, unsigned char column);
@@ -24,10 +24,10 @@ static void LCD_WriteStr(char *data);
 
 
 /* Send byte to LCD */
-static void LCD_SPISend(uint8_t data) {
+void LCD_SPISend(uint8_t data) {
 	CS_OFF;
 	SPI_SendData8(OLED_SPI, data);
-    while (SPI_I2S_GetFlagStatus(OLED_SPI, SPI_I2S_FLAG_TXE) == RESET);
+	while (SPI_I2S_GetFlagStatus(OLED_SPI, SPI_I2S_FLAG_BSY) == SET);
     CS_ON;
 }
 

@@ -5,6 +5,7 @@ CSRC = $(wildcard *.c )
 INCLUDES = -I./lcd/
 CSRC += $(wildcard ./lcd/*.c)
 
+
 # CMSIS
 STM_CMSIS = ../libs/STM32F0xx
 INCLUDES += -I./cmsis -I./cmsis_boot
@@ -12,10 +13,14 @@ INCLUDES += -I.
 INCLUDES += -I../libs/printf
 INCLUDES += -I../libs/fifo
 INCLUDES += -I../libs/nrf24l01/stmf0-nrf
+INCLUDES += -I../libs/u8glib_arm_v1.14/stm32f0
+INCLUDES += -I../libs/u8glib_arm_v1.14/src
 CSRC += $(wildcard ./cmsis_boot/*.c ./cmsis/*.c)
 CSRC += $(wildcard ../libs/printf/*.c)
 CSRC += $(wildcard ../libs/fifo/*.c)
 CSRC += $(wildcard ../libs/nrf24l01/stmf0-nrf/*.c)
+CSRC += $(wildcard ../libs/u8glib_arm_v1.14/stm32f0/*.c)
+CSRC += $(wildcard ../libs/u8glib_arm_v1.14/src/*.c)
 CSRC += $(wildcard ./cmsis_boot/startup/*.c)
 #ASMSRC = $(wildcard ./cmsis_boot/startup/*.s)
 
