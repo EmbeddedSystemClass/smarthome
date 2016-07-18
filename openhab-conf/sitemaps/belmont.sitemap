@@ -1,0 +1,20 @@
+sitemap belmont label="Main Menu"{
+    Frame {
+        Group item=gSF label="Attic" icon="secondfloor"
+        Group item=gFF label="First Floor" icon="firstfloor"
+        Group item=gGF label="Ground Floor" icon="groundfloor"
+        Group item=gC label="Basement" icon="cellar"    
+        Group item=Garden icon="garden" 
+    }
+    Frame label="Basement Monitor" {
+        Text item=BasementMonitor_Hum01
+	Text item=My_Time
+	Text item=Temper
+	//Switch item=Led icon="light" mappings=[ON="Вкл", OFF="Выкл"]
+	Switch item=Led icon="light"
+	Slider item=Dim
+	Chart item=Temper period=h refresh=10000
+    }
+}
+
+

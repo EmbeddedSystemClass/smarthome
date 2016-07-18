@@ -1,0 +1,19 @@
+Basement Monitor Group All
+
+// Sensor Types
+Group gTemperature (All) // Contains all temperature sensors
+
+Number  My_Time   "Time [%d]"            			<temperature>   (gC_Furnace, gHumidity)      {mqtt="<[mysensors:/mcu/stat/uptime:state:default]"}
+
+Switch Led "Blue Led" (gC_Furnace, gHumidity) {mqtt=">[mysensors:/mcu/cmd/led:command:ON:1],>[mysensors:/mcu/cmd/led:command:OFF:0],<[mysensors:/mcu/led/:state:default]"}
+
+Dimmer Dim "Blue Led [%d %%]" (gC_Furnace, gHumidity) {mqtt=">[mysensors:/mcu/cmd/dim:command:*:default]"}
+
+Number Temper "Temperature [%.1f °C]"    <temperature>    ()      {mqtt="<[mysensors:/mcu/stat/temp:state:default]"}
+
+Frame label="Charts"
+{
+//change period to 4h for 4 hours, D for 1 day, 3D for 3 days, W for 1 Week, 3W for 3 we
+Chart item=Temper period=h refresh=10000
+}
+
