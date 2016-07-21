@@ -2,9 +2,10 @@
 Strategies {
 	// for rrd charts, we need a cron strategy
 	everyMinute : "0 * * * * ?"
+	everySecond : "* * * * * ?"
 }
 
 Items {
 	// let's only store temperature values in rrd
-	Temper : strategy = everyMinute, restoreOnStartup
+	Temper : strategy = everySecond, restoreOnStartup
 }
