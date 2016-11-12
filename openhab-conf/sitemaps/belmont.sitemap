@@ -4,16 +4,22 @@ sitemap belmont label="Main Menu"{
         Group item=gFF label="First Floor" icon="firstfloor"
         Group item=gGF label="Ground Floor" icon="groundfloor"
         Group item=gC label="Basement" icon="cellar"    
-        Group item=Garden icon="garden" 
     }
-    Frame label="Basement Monitor" {
-        Text item=BasementMonitor_Hum01
+    Frame label="Гостинная" {
 	Text item=My_Time
 	Text item=Temper
+	Text item=DHTTemper
+	Text item=Humidity
 	//Switch item=Led icon="light" mappings=[ON="Вкл", OFF="Выкл"]
-	Switch item=Led icon="light"
+	Switch item=Sock1 icon="light"
+	Switch item=Sock2 icon="light"
 	Slider item=Dim
-	Chart item=Temper period=h refresh=10000
+	Chart item=Temper period=W refresh=1000
+	Chart item=DHTTemper period=W refresh=1000
+	Chart item=Temper period=d efresh=1000
+	Chart item=DHTTemper period=d refresh=1000
+	Chart item=Humidity period=W refresh=1000
+	Chart item=Humidity period=d refresh=1000
     }
 }
 
