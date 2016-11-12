@@ -18,4 +18,4 @@ function onChange ()
 end
 
 gpio.mode(pin, gpio.INT, gpio.PULLUP)
-gpio.trig(pin, 'down',  debounce(onChange))
+gpio.trig(pin, 'both',  debounce(onChange))

@@ -1,6 +1,6 @@
 #!/usr/bin/expect
 #If it all goes pear shaped the script will timeout after 20 seconds.
-set timeout 20
+set timeout 1
 #First argument is assigned to the variable ip
 set ip [lindex $argv 0]
 #Second argument is assigned to the variable port
