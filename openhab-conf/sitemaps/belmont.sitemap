@@ -10,6 +10,7 @@ sitemap belmont label="Main Menu"{
 	Text item=Temper
 	Text item=DHTTemper
 	Text item=Humidity
+	Text item=Pir
 	//Switch item=Led icon="light" mappings=[ON="Вкл", OFF="Выкл"]
 	Switch item=Sock1 icon="light"
 	Switch item=Sock2 icon="light"

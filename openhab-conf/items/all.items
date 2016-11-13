@@ -9,6 +9,8 @@ Switch Sock1 "Торшер" {mqtt=">[mysensors:/socket/cmd/relay1:command:ON:1],
 
 Switch Sock2 "Розетка 2" {mqtt=">[mysensors:/socket/cmd/relay2:command:ON:1],>[mysensors:/socket/cmd/relay2:command:OFF:0],<[mysensors:/socket/stat/relay2/:state:default]"}
 
+Number Pir "Motion [%d]" ()      {mqtt="<[mysensors:/pir/stat/motion:state:default]"}
+
 Dimmer Dim "Blue Led [%d %%]" (gC_Furnace, gHumidity) {mqtt=">[mysensors:/mcu/cmd/dim:command:*:default]"}
 
 Number Temper "Температура 1 [%.1f °C]"    <temperature>    ()      {mqtt="<[mysensors:/mcu/stat/temp:state:default]"}
