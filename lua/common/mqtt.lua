@@ -2,7 +2,7 @@
 -- function dispatcher based on topic and message content
 m_dis = {}
 
-MQTT_CLIENTID = "socket"
+MQTT_CLIENTID = "weather"
 MQTT_HOST = "192.168.1.206"
 MQTT_PORT = 1883
 
@@ -10,69 +10,54 @@ MQTT_PORT = 1883
 local count = 0
 local time = 0
 
-local relay1_pin = 6            --> GPIO12
-local relay2_pin = 7            --> GPIO13
-
-gpio.mode(relay1_pin, gpio.OUTPUT)
-gpio.write(relay1_pin, gpio.HIGH)
-
-gpio.mode(relay2_pin, gpio.OUTPUT)
-gpio.write(relay2_pin, gpio.HIGH)
+gpio.mode(4, gpio.OUTPUT)
+gpio.write(4, gpio.HIGH)
 
 tmr.stop(2)
 
-function relay1(m, pl)    
+pwm.setup(4,1000,1000);
+pwm.start(4);
+
+function animate(m, pl)
+    -- Confirm that an animation message was received on the /mcu/cmd topic
+    m:publish("/mcu/led/", "--> ANIMATE COMMAND", 0, 0,
+            function(m) print("ANIMATE COMMAND") end)
+    
     -- Main option control structure. Pretty gross-looking but it works
     -- Option 0 turns everything off
     if pl == "0" then
         -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/socket/stat/relay1/", "OFF", 0, 0,
+        m:publish("/mcu/led/", "OFF", 0, 0,
             function(m) print("LED OFF") end)
 
-        gpio.write(relay1_pin, gpio.HIGH)
-        print("Relay1 HIGH")
-
-             
+        gpio.write(4, gpio.HIGH)
+      
     end
     if pl == "1" then
         -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/socket/stat/relay1/", "ON", 0, 0,
+        m:publish("/mcu/led/", "ON", 0, 0,
             function(m) print("LED ON") end)
 
-        gpio.write(relay1_pin, gpio.LOW)
-        print("Relay1 LOW")
-        
+        gpio.write(4, gpio.LOW)
+      
     end
 end
 
-function relay2(m, pl)    
-    -- Main option control structure. Pretty gross-looking but it works
-    -- Option 0 turns everything off
-    if pl == "0" then
-        -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/socket/stat/relay2/", "OFF", 0, 0,
-            function(m) print("LED OFF") end)
-
-        gpio.write(relay2_pin, gpio.HIGH)
-        print("Relay2 HIGH")
-
-             
-    end
-    if pl == "1" then
-        -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/socket/stat/relay2/", "ON", 0, 0,
-            function(m) print("LED ON") end)
-
-        gpio.write(relay2_pin, gpio.LOW)
-        print("Relay2 LOW")
-        
+function dim(m, pl)
+    -- Confirm that an animation message was received on the /mcu/cmd topic
+    m:publish("/mcu/led/", "--> DIM COMMAND", 0, 0,
+            function(m) print("DIM COMMAND") end)
+   
+    if pl ~= nil then
+        pwm.setduty(4,1000-pl*10);
     end
 end
 
+    
 -- As part of the dispatcher algorithm, this assigns a topic name as a key or
 -- index to a particular function name
-m_dis["/socket/cmd/relay1"] = relay1
-m_dis["/socket/cmd/relay2"] = relay2
+m_dis["/mcu/cmd/led"] = animate
+m_dis["/mcu/cmd/dim"] = dim
 
 -- initialize mqtt client with keepalive timer of 60sec
 m = mqtt.Client(MQTT_CLIENTID, 60, "", "") -- Living dangerously. No password!
@@ -91,15 +76,33 @@ m:on("connect", function(m)
         " on port ", MQTT_PORT, "\n\n")
 
     -- Subscribe to the topic where the ESP8266 will get commands from
-    m:subscribe("/socket/cmd/#", 0,
+    m:subscribe("/mcu/cmd/#", 0,
         function(m) print("Subscribed to CMD Topic") end)
 
     tmr.alarm(2, 1000, 1, function ()
             time = time + 1
-            m:publish("/socket/stat/uptime", time, 0, 0,
+            m:publish("/mcu/stat/uptime", time, 0, 0,
             function(m) print("Sent:" .. time) end)
     end)
-       
+
+    tmr.alarm(5, 5000, 1, function ()
+            if (temp ~= nil ) then
+                local str = string.format("%0.1f", temp)
+                m:publish("/mcu/stat/temp", str, 0, 0,
+                function(m) print("Temp:" .. str) end)
+            end
+            if (dhttemp ~= nil ) then
+                local str = string.format("%0.1f", dhttemp)
+                m:publish("/mcu/stat/dhttemp", str, 0, 0,
+                function(m) print("DHTTemp:" .. str) end)
+            end
+            if (dhthumi ~= nil ) then
+                local str = string.format("%d", dhthumi)
+                m:publish("/mcu/stat/humi", str, 0, 0,
+                function(m) print("DHThumi:" .. str) end)
+            end
+    end)
+        
 end)
 
 
