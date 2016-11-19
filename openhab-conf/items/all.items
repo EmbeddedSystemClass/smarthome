@@ -5,15 +5,23 @@ Group gTemperature (All) // Contains all temperature sensors
 
 Number  My_Time   "Time [%d]"            			<temperature>   (gC_Furnace, gHumidity)      {mqtt="<[mysensors:/mcu/stat/uptime:state:default]"}
 
-Switch Led "Blue Led" (gC_Furnace, gHumidity) {mqtt=">[mysensors:/mcu/cmd/led:command:ON:1],>[mysensors:/mcu/cmd/led:command:OFF:0],<[mysensors:/mcu/led/:state:default]"}
+Switch Sock1 "Торшер" {mqtt=">[mysensors:/socket/cmd/relay1:command:ON:1],>[mysensors:/socket/cmd/relay1:command:OFF:0],<[mysensors:/socket/stat/relay1/:state:default]"}
+
+Switch Sock2 "Розетка 2" {mqtt=">[mysensors:/socket/cmd/relay2:command:ON:1],>[mysensors:/socket/cmd/relay2:command:OFF:0],<[mysensors:/socket/stat/relay2/:state:default]"}
+
+Number Pir "Motion [%d]" ()      {mqtt="<[mysensors:/pir/stat/motion:state:default]"}
 
 Dimmer Dim "Blue Led [%d %%]" (gC_Furnace, gHumidity) {mqtt=">[mysensors:/mcu/cmd/dim:command:*:default]"}
 
-Number Temper "Temperature [%.1f °C]"    <temperature>    ()      {mqtt="<[mysensors:/mcu/stat/temp:state:default]"}
+Number Temper "Температура 1 [%.1f °C]"    <temperature>    ()      {mqtt="<[mysensors:/mcu/stat/temp:state:default]"}
+
+Number DHTTemper "Температура 2 [%.1f °C]"    <temperature>    ()      {mqtt="<[mysensors:/mcu/stat/dhttemp:state:default]"}
+
+Number Humidity "Влажность [%d%%]"    <humidity>    ()      {mqtt="<[mysensors:/mcu/stat/humi:state:default]"}
 
 Frame label="Charts"
 {
 //change period to 4h for 4 hours, D for 1 day, 3D for 3 days, W for 1 Week, 3W for 3 we
-Chart item=Temper period=h refresh=10000
+Chart item=Temper period=h refresh=1000
 }
 
