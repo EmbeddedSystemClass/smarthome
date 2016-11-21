@@ -1,17 +1,15 @@
-print("PWM Function test")
+print("Servo test")
 
-local pin = 7
-
-gpio.mode(pin, gpio.OUTPUT)
-gpio.write(pin, gpio.LOW)
-pwm.start(pin);
-
+local pin = 9
+local clock = 100
 local flag=1;
-
 local min=55;
 local max=240;
 
-pwm.setup(pin,100,max);
+gpio.mode(pin, gpio.OUTPUT)
+gpio.write(pin, gpio.LOW)
+pwm.setup(pin,clock,min);
+pwm.start(pin)
 
 tmr.alarm(2,2000,1,function()
      if flag==1 then
