@@ -11,26 +11,51 @@ local right_button = 1
 local fd_button = 2
 local rr_button = 3
 
-local pins = {1, 2, 3, 6}
+local pins = {1, 2, 5, 6}
 
 local pos = 0
 
-function debounce (func)
+function debounce (func, level)
     local last = 0
-    local delay = 500000
+    local delay = 300000
 
     return function (...)
         local now = tmr.now()
+        
+        print(level)        
+        
         if now - last < delay then return end
 
         last = now
-        return func(...)
+        return func(dir)
     end
 end
 
 
 function onChange ()
-    print('The pin value has changed')
+    print('hello')
+end
+
+
+function funcB_down()
+    print('B pressed')
+    gpio.trig(pins[4], 'up',  debounce(funcB_up))  
+end
+
+function funcB_up()
+    print('B up')
+    gpio.trig(pins[4], 'down',  debounce(funcB_down))  
+end
+
+
+function funcA(dir)
+    if dir == 'd' then 
+    print('D')
+    gpio.trig(pins[2], 'up',  debounce(funcA, 'u'))
+    else 
+    print('U')
+    gpio.trig(pins[2], 'down',  debounce(funcA, 'd'))
+    end
 end
 
 
@@ -38,8 +63,13 @@ print("Init Inputs: ")
 for i = 1, table.getn(pins) do
     print("pin: " .. pins[i]) 
     gpio.mode(pins[i], gpio.INT, gpio.PULLUP)
-    gpio.trig(pins[i], 'down',  debounce(onChange))
+    --gpio.trig(pins[i], 'down',  debounce(onChange))
 end
+
+ gpio.trig(pins[1], 'down',  debounce(onChange))
+  gpio.trig(pins[2], 'down',  debounce(funcA, 'd'))
+   gpio.trig(pins[3], 'down',  debounce(onChange))
+    gpio.trig(pins[4], 'down',  debounce(funcB_down))
 
 
 adc.force_init_mode(adc.INIT_ADC)
@@ -52,8 +82,8 @@ tmr.alarm(5, 50, 1, function ()
         pos = val
 
         srv = val / 6 + 65
-        m:publish("/motor/cmd/servo", "5"..","..srv, 0, 0,
-            function(m) print("5"..","..srv) end)
+        --m:publish("/motor/cmd/servo", "5"..","..srv, 0, 0,
+        --    function(m) print("5"..","..srv) end)
     end
  end)
 
