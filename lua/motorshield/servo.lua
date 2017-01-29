@@ -3,7 +3,7 @@ local servo = {}
 local pins = {5, 6, 7, 8}
 local clock = 100
 
-local min=60;
+local min=65;
 local max=240;
 
 print("Init servos: ")
