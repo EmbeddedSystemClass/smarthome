@@ -10,8 +10,8 @@ MQTT_PORT = 1883
 local count = 0
 local time = 0
 
-local relay1_pin = 6            --> GPIO12
-local relay2_pin = 7            --> GPIO13
+local relay1_pin = 5            --> GPIO14
+local relay2_pin = 0            --> GPIO16
 
 gpio.mode(relay1_pin, gpio.OUTPUT)
 gpio.write(relay1_pin, gpio.HIGH)
