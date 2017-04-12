@@ -21,14 +21,14 @@ pwm.start(4);
 
 function animate(m, pl)
     -- Confirm that an animation message was received on the /mcu/cmd topic
-    m:publish("/mcu/led/", "--> ANIMATE COMMAND", 0, 0,
+    m:publish("/"..MQTT_CLIENTID.."/led/", "--> ANIMATE COMMAND", 0, 0,
             function(m) print("ANIMATE COMMAND") end)
     
     -- Main option control structure. Pretty gross-looking but it works
     -- Option 0 turns everything off
     if pl == "0" then
         -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/mcu/led/", "OFF", 0, 0,
+        m:publish("/"..MQTT_CLIENTID.."/led/", "OFF", 0, 0,
             function(m) print("LED OFF") end)
 
         gpio.write(4, gpio.HIGH)
@@ -36,7 +36,7 @@ function animate(m, pl)
     end
     if pl == "1" then
         -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/mcu/led/", "ON", 0, 0,
+        m:publish("/"..MQTT_CLIENTID.."/led/", "ON", 0, 0,
             function(m) print("LED ON") end)
 
         gpio.write(4, gpio.LOW)
@@ -46,7 +46,7 @@ end
 
 function dim(m, pl)
     -- Confirm that an animation message was received on the /mcu/cmd topic
-    m:publish("/mcu/led/", "--> DIM COMMAND", 0, 0,
+    m:publish("/"..MQTT_CLIENTID.."/led/", "--> DIM COMMAND", 0, 0,
             function(m) print("DIM COMMAND") end)
    
     if pl ~= nil then
@@ -57,8 +57,8 @@ end
     
 -- As part of the dispatcher algorithm, this assigns a topic name as a key or
 -- index to a particular function name
-m_dis["/mcu/cmd/led"] = animate
-m_dis["/mcu/cmd/dim"] = dim
+m_dis["/"..MQTT_CLIENTID.."/cmd/led"] = animate
+m_dis["/"..MQTT_CLIENTID.."/cmd/dim"] = dim
 
 -- initialize mqtt client with keepalive timer of 60sec
 m = mqtt.Client(MQTT_CLIENTID, 60, "", "") -- Living dangerously. No password!
@@ -77,10 +77,10 @@ m:on("connect", function(m)
         " on port ", MQTT_PORT, "\n\n")
 
     -- Subscribe to the topic where the ESP8266 will get commands from
-    m:subscribe("/mcu/cmd/#", 0,
+    m:subscribe("/"..MQTT_CLIENTID.."/cmd/#", 0,
         function(m) print("Subscribed to CMD Topic") end)
 
-    m:publish("/mcu/stat/ip", wifi.sta.getip(), 0, 0, nil)
+    m:publish("/"..MQTT_CLIENTID.."/stat/ip", wifi.sta.getip(), 0, 0, nil)
 
     tmr.alarm(2, 60009, 1, function ()
             time = tmr.time()
@@ -88,27 +88,27 @@ m:on("connect", function(m)
             hh = time / 3600
             mm = time / 60
             local str = string.format("%dd %dh %dm", dd, hh, mm)
-            m:publish("/mcu/stat/uptime", str, 0, 0, nil)
-            m:publish("/mcu/stat/ip", wifi.sta.getip(), 0, 0, nil)
+            m:publish("/"..MQTT_CLIENTID.."/stat/uptime", str, 0, 0, nil)
+            m:publish("/"..MQTT_CLIENTID.."/stat/ip", wifi.sta.getip(), 0, 0, nil)
     end)
 
     tmr.alarm(5, 20000, 1, function ()
             if (temp ~= nil and state == 0) then
                 state = 1;
                 local str = string.format("%0.1f", temp)
-                m:publish("/mcu/stat/temp", str, 0, 0, nil)
+                m:publish("/"..MQTT_CLIENTID.."/stat/temp", str, 0, 0, nil)
                 return
             end
             if (dhttemp ~= nil and state == 1) then
                 state = 2
                 local str = string.format("%0.1f", dhttemp)
-                m:publish("/mcu/stat/dhttemp", str, 0, 0, nil)
+                m:publish("/"..MQTT_CLIENTID.."/stat/dhttemp", str, 0, 0, nil)
                 return
             end
             if (dhthumi ~= nil and state == 2) then
                 state = 0
                 local str = string.format("%d", dhthumi)
-                m:publish("/mcu/stat/humi", str, 0, 0, nil)
+                m:publish("/"..MQTT_CLIENTID.."/stat/humi", str, 0, 0, nil)
                 return
             end
     end)
