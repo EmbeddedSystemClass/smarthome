@@ -17,17 +17,17 @@ local pos = 0
 
 function debounce (func, level)
     local last = 0
-    local delay = 300000
+    local delay = 30000
 
     return function (...)
-        local now = tmr.now()
+        local now = tmr.now()      
+        local diff = now - last
+        print(diff)
         
-        print(level)        
-        
-        if now - last < delay then return end
+        if diff < delay then print(diff) return end
 
         last = now
-        return func(dir)
+        return func()
     end
 end
 
@@ -39,14 +39,31 @@ end
 
 function funcB_down()
     print('B pressed')
+    m:publish("/motor/cmd/forward", 1023, 0, 0,
+        function(m) print("fwd") end)
     gpio.trig(pins[4], 'up',  debounce(funcB_up))  
 end
 
 function funcB_up()
     print('B up')
+    m:publish("/motor/cmd/forward", 0, 0, 0,
+        function(m) print("stop") end)
     gpio.trig(pins[4], 'down',  debounce(funcB_down))  
 end
 
+function funcA_down()
+    print('A pressed')
+    m:publish("/motor/cmd/left", 1023, 0, 0,
+        function(m) print("left") end)
+    gpio.trig(pins[2], 'up',  funcA_up)  
+end
+
+function funcA_up()
+    print('A up')
+    m:publish("/motor/cmd/left", 0, 0, 0,
+        function(m) print("stop") end)
+    gpio.trig(pins[2], 'down',  funcA_down)  
+end
 
 function funcA(dir)
     if dir == 'd' then 
@@ -66,10 +83,10 @@ for i = 1, table.getn(pins) do
     --gpio.trig(pins[i], 'down',  debounce(onChange))
 end
 
- gpio.trig(pins[1], 'down',  debounce(onChange))
-  gpio.trig(pins[2], 'down',  debounce(funcA, 'd'))
-   gpio.trig(pins[3], 'down',  debounce(onChange))
-    gpio.trig(pins[4], 'down',  debounce(funcB_down))
+gpio.trig(pins[1], 'down',  debounce(onChange))
+gpio.trig(pins[2], 'down',  debounce(funcA_down))
+gpio.trig(pins[3], 'down',  debounce(onChange))
+gpio.trig(pins[4], 'down',  debounce(funcB_down))
 
 
 adc.force_init_mode(adc.INIT_ADC)
@@ -82,8 +99,8 @@ tmr.alarm(5, 50, 1, function ()
         pos = val
 
         srv = val / 6 + 65
-        --m:publish("/motor/cmd/servo", "5"..","..srv, 0, 0,
-        --    function(m) print("5"..","..srv) end)
+        m:publish("/motor/cmd/servo", "5"..","..srv, 0, 0,
+            function(m) print("5"..","..srv) end)
     end
  end)
 
