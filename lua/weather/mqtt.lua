@@ -85,14 +85,15 @@ m:on("connect", function(m)
     tmr.alarm(2, 60009, 1, function ()
             time = tmr.time()
             dd = time / (3600 * 24) 
-            hh = time / 3600
-            mm = time / 60
+            hh = (time / 3600) % 24
+            mm = (time / 60) % 60
             local str = string.format("%dd %dh %dm", dd, hh, mm)
+            print(str)
             m:publish("/"..MQTT_CLIENTID.."/stat/uptime", str, 0, 0, nil)
             m:publish("/"..MQTT_CLIENTID.."/stat/ip", wifi.sta.getip(), 0, 0, nil)
     end)
 
-    tmr.alarm(5, 20000, 1, function ()
+    tmr.alarm(5, 10000, 1, function ()
             if (temp ~= nil and state == 0) then
                 state = 1;
                 local str = string.format("%0.1f", temp)
