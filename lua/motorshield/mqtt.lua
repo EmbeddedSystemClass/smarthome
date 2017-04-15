@@ -49,7 +49,7 @@ function turn_right(m, pl)
     m:publish("/motor/stat/run", "right " .. pl, 0, 0,
             function(m) print("run: right" .. pl) end)
     
-    motor.set("A", "B", pl)
+    motor.set("A", "R", pl)
     motor.set("B", "F", pl)
 end
 
