@@ -123,7 +123,17 @@ m:on("connect", function(m)
     -- Subscribe to the topic where the ESP8266 will get commands from
     m:subscribe("/motor/cmd/#", 0,
         function(m) print("Subscribed to CMD Topic") end)
-        
+
+    tmr.alarm(2, 509, 1, function ()
+        time = tmr.time()
+        dd = time / (3600 * 24) 
+        hh = (time / 3600) % 24
+        mm = (time / 60) % 60
+        local str = string.format("%dd %dh %dm", dd, hh, mm)
+        print(str)
+        m:publish("/"..MQTT_CLIENTID.."/stat/uptime", str, 0, 0, nil)
+        m:publish("/"..MQTT_CLIENTID.."/stat/ip", wifi.sta.getip(), 0, 0, nil)
+    end)
 end)
 
 
