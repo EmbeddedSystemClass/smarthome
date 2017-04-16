@@ -2,7 +2,7 @@
 -- function dispatcher based on topic and message content
 m_dis = {}
 
-MQTT_CLIENTID = "socket2"
+MQTT_CLIENTID = "socket1"
 MQTT_HOST = "192.168.1.206"
 MQTT_PORT = 1883
 
@@ -10,14 +10,14 @@ MQTT_PORT = 1883
 local count = 0
 local time = 0
 
-local relay1_pin = 5            --> GPIO14
+local relay1_pin = 6            --> GPIO14
 local relay2_pin = 0            --> GPIO16
 
 gpio.mode(relay1_pin, gpio.OUTPUT)
 gpio.write(relay1_pin, gpio.HIGH)
 
-gpio.mode(relay2_pin, gpio.OUTPUT)
-gpio.write(relay2_pin, gpio.HIGH)
+--gpio.mode(relay2_pin, gpio.OUTPUT)
+--gpio.write(relay2_pin, gpio.HIGH)
 
 tmr.stop(2)
 
@@ -26,7 +26,7 @@ function relay1(m, pl)
     -- Option 0 turns everything off
     if pl == "0" then
         -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/socket2/stat/relay1/", "OFF", 0, 0,
+        m:publish("/"..MQTT_CLIENTID.."/stat/relay1/", "OFF", 0, 0,
             function(m) print("LED OFF") end)
 
         gpio.write(relay1_pin, gpio.HIGH)
@@ -36,7 +36,7 @@ function relay1(m, pl)
     end
     if pl == "1" then
         -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/socket2/stat/relay1/", "ON", 0, 0,
+        m:publish("/"..MQTT_CLIENTID.."/stat/relay1/", "ON", 0, 0,
             function(m) print("LED ON") end)
 
         gpio.write(relay1_pin, gpio.LOW)
@@ -50,7 +50,7 @@ function relay2(m, pl)
     -- Option 0 turns everything off
     if pl == "0" then
         -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/socket2/stat/relay2/", "OFF", 0, 0,
+        m:publish("/"..MQTT_CLIENTID.."/stat/relay2/", "OFF", 0, 0,
             function(m) print("LED OFF") end)
 
         gpio.write(relay2_pin, gpio.HIGH)
@@ -60,7 +60,7 @@ function relay2(m, pl)
     end
     if pl == "1" then
         -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/socket2/stat/relay2/", "ON", 0, 0,
+        m:publish("/"..MQTT_CLIENTID.."/stat/relay2/", "ON", 0, 0,
             function(m) print("LED ON") end)
 
         gpio.write(relay2_pin, gpio.LOW)
@@ -71,8 +71,7 @@ end
 
 -- As part of the dispatcher algorithm, this assigns a topic name as a key or
 -- index to a particular function name
-m_dis["/socket2/cmd/relay1"] = relay1
-m_dis["/socket2/cmd/relay2"] = relay2
+m_dis["/"..MQTT_CLIENTID.."/cmd/relay1"] = relay1
 
 -- initialize mqtt client with keepalive timer of 60sec
 m = mqtt.Client(MQTT_CLIENTID, 60, "", "") -- Living dangerously. No password!
@@ -91,13 +90,18 @@ m:on("connect", function(m)
         " on port ", MQTT_PORT, "\n\n")
 
     -- Subscribe to the topic where the ESP8266 will get commands from
-    m:subscribe("/socket2/cmd/#", 0,
+    m:subscribe("/"..MQTT_CLIENTID.."/cmd/#", 0,
         function(m) print("Subscribed to CMD Topic") end)
 
-    tmr.alarm(2, 1000, 1, function ()
-            time = time + 1
-            m:publish("/socket2/stat/uptime", time, 0, 0,
-            function(m) print("Sent:" .. time) end)
+    tmr.alarm(2, 60009, 1, function ()
+        time = tmr.time()
+        dd = time / (3600 * 24) 
+        hh = (time / 3600) % 24
+        mm = (time / 60) % 60
+        local str = string.format("%dd %dh %dm", dd, hh, mm)
+        print(str)
+        m:publish("/"..MQTT_CLIENTID.."/stat/uptime", str, 0, 0, nil)
+        m:publish("/"..MQTT_CLIENTID.."/stat/ip", wifi.sta.getip(), 0, 0, nil)
     end)
        
 end)
