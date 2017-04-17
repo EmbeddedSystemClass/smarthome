@@ -1,4 +1,5 @@
 local servo = require "servo"
+require "runtime"
 
 local delta = 32 
 
@@ -12,6 +13,9 @@ valves_trim_cl = {}
 valves_states = {}
 
 local pump_pin = 0
+local pump_timer = tmr.create()
+
+local servo_en = 7
 
 -- Holds dispatching keys to different topics. Serves as a makeshift callback
 -- function dispatcher based on topic and message content
@@ -29,6 +33,8 @@ local time = 0
 -- Init ADC
 adc.force_init_mode(adc.INIT_ADC)
 
+gpio.mode(servo_en, gpio.OUTPUT)
+gpio.write(servo_en, gpio.HIGH) 
 
 function check_btn(val, btn)
     if val > btn - delta and val < btn + delta then
@@ -117,23 +123,34 @@ function init_trimmer()
     end
 end
    
-            
-    
-
-
 function switch_valve(valve)
     if valves_states[valve] then 
         servo.set(btn_valves[valve], valves_closed[valve])
         valves_states[valve] = false
+        gpio.write(pump_pin, gpio.LOW) 
     else
         servo.set(btn_valves[valve], valves_opened[valve])
         valves_states[valve] = true
+        gpio.write(pump_pin, gpio.HIGH) 
     end    
 end
 
+function close_all()
+    for i, valve in pairs(btn_valves) do
+        print(i, valve)
+        servo.set(valve, valves_closed[i])
+        valves_states[i] = false
+    end
+end
 
 init_trimmer()
+init_timer()
 
+
+tmr.register(pump_timer, 5000, tmr.ALARM_SEMI, function (t) 
+    print("Stop pump")
+    gpio.write(pump_pin, gpio.LOW) 
+    end)
 
 -- Buttons polling (ADC)
 tmr.alarm(5, 100, 1, function ()
@@ -145,7 +162,7 @@ tmr.alarm(5, 100, 1, function ()
     elseif check_btn(val, btn_vals[2]) and release then
         print ("btn2")
         switch_valve(2)
-        release = false
+        release = falseset_time
     elseif check_btn(val, btn_vals[3]) and release then
         print ("btn3")
         switch_valve(3)
@@ -186,13 +203,34 @@ function set_pump(m, pl)
     end
 end
 
+function run(m, pl)
+    m:publish("/water/stat/mode", "run: " .. pl, 0, 0,
+            function(m) print("run: " .. pl) end)
+    close_all()
+    switch_valve(tonumber(pl))
+    gpio.write(pump_pin, gpio.HIGH)
+    int = timers[tonumber(pl)] * 1000
+    print("int: " .. int)
+    tmr.interval(pump_timer, int) 
+    tmr.start(pump_timer)
+end
+
+function stop(m)
+    m:publish("/water/stat/mode", "stop", 0, 0,
+            function(m) print("stop") end)
+    close_all()
+    gpio.write(pump_pin, gpio.LOW)
+end
     
 -- As part of the dispatcher algorithm, this assigns a topic name as a key or
 -- index to a particular function name
-m_dis["/water/cmd/servo"] = move_servo
-m_dis["/water/cmd/pump"] = set_pump
-m_dis["/water/cmd/trim_closed"] = set_trimmer_closed
-m_dis["/water/cmd/trim_opened"] = set_trimmer_opened
+m_dis["/water/cmd/servo"] = move_servo --<valve num>,<position>
+m_dis["/water/cmd/pump"] = set_pump --<0/1> - pump state
+m_dis["/water/cmd/run"] = run --<valve num>
+m_dis["/water/cmd/stop"] = stop --<any payload> - stop all
+m_dis["/water/cmd/trim_closed"] = set_trimmer_closed --<valve num> closed valve position
+m_dis["/water/cmd/trim_opened"] = set_trimmer_opened --<valve num> opened valve position
+m_dis["/water/cmd/time"] = set_timer --<valve num> time to run valve
 
 -- initialize mqtt client with keepalive timer of 60sec
 m = mqtt.Client(MQTT_CLIENTID, 60, "", "") -- Living dangerously. No password!
