@@ -1,16 +1,11 @@
 local servo = require "servo"
 require "runtime"
+require "trimmer"
 
 local delta = 32 
 
 btn_vals = {13, 254, 465, 648, 811}
 btn_valves = pins
-
-valves_closed = {150, 150, 150, 150, 150}
-valves_opened = {210, 210, 210, 210, 210}
-valves_trim_op = {}
-valves_trim_cl = {}
-valves_states = {}
 
 local pump_pin = 0
 local pump_timer = tmr.create()
@@ -21,7 +16,7 @@ local servo_en = 7
 -- function dispatcher based on topic and message content
 m_dis = {}
 
-MQTT_CLIENTID = "watering"
+MQTT_CLIENTID = "water"
 MQTT_HOST = "192.168.1.206"
 MQTT_PORT = 1883
 
@@ -29,12 +24,37 @@ MQTT_PORT = 1883
 local count = 0
 local time = 0
 
+-- Use remote controlled pump or local controlled pump
+local use_remote_pump = true
+
 
 -- Init ADC
 adc.force_init_mode(adc.INIT_ADC)
 
 gpio.mode(servo_en, gpio.OUTPUT)
 gpio.write(servo_en, gpio.HIGH) 
+
+gpio.mode(pump_pin, gpio.OUTPUT)
+gpio.write(pump_pin, gpio.LOW) 
+
+
+function pump_run()
+    if use_remote_pump then
+        m:publish("/socket2/cmd/relay1", "1", 0, 0,
+            function(m) print("relay1 - ON") end)
+    else
+        gpio.write(pump_pin, gpio.HIGH)
+    end
+end
+
+function pump_stop()
+    if use_remote_pump then
+        m:publish("/socket2/cmd/relay1", "0", 0, 0,
+            function(m) print("relay1 - OFF") end)
+    else
+        gpio.write(pump_pin, gpio.LOW)
+    end
+end
 
 function check_btn(val, btn)
     if val > btn - delta and val < btn + delta then
@@ -44,13 +64,7 @@ function check_btn(val, btn)
     end
 end
 
-function trim_parce(str, table)
-    local i = 1
-    for token in string.gmatch(str, "%S+") do
-        table[i] = tonumber(token)
-        i=i+1
-    end
-end
+
 
 function set_trimmer_closed(m, pl)
     local args = {}
@@ -70,68 +84,17 @@ function set_trimmer_opened(m, pl)
     save_trimmer()
 end
 
-function save_trimmer()
-    file.open("trim.txt", "w")
-    
-    trim = ""
-    for k, v in pairs(valves_closed) do 
-        trim = trim .. v 
-        trim = trim .. " "
-        end
-    --trim = trim .. "\n"
-    file.writeline(trim)
 
-    trim = ""
-    for k, v in pairs(valves_opened) do
-        trim = trim .. v 
-        trim = trim .. " "
-     end
-    --trim = trim .. "\n"
-    file.writeline(trim)    
-    
-    file.close()
-end
-
-function init_trimmer()
-    if file.open("trim.txt", "r") ~= nil then
-    
-        trim = file.readline()
-        if trim ~= nil then
-            trim_parce(trim, valves_closed)
-            print("valves sclosed:")
-            for k, v in pairs(valves_closed) do print(k .. ": " .. v) end
-        else
-            print("read error")
-        end
-
-        trim = file.readline()
-        if trim ~= nil then
-            trim_parce(trim, valves_opened)
-            print("valves opened:")
-            for k, v in pairs(valves_opened) do print(k .. ": " .. v) end
-        else
-            print("read error")
-        end
-        
-        file.close()
-    else
-        print("Trim mot found. Defaults restored")
-        file.open("trim.txt", "w")
-        file.writeline("150 150 150 150 150")
-        file.writeline("210 210 210 210 210")
-        file.close()
-    end
-end
    
 function switch_valve(valve)
     if valves_states[valve] then 
         servo.set(btn_valves[valve], valves_closed[valve])
         valves_states[valve] = false
-        gpio.write(pump_pin, gpio.LOW) 
+        pump_stop() 
     else
         servo.set(btn_valves[valve], valves_opened[valve])
         valves_states[valve] = true
-        gpio.write(pump_pin, gpio.HIGH) 
+        pump_run()
     end    
 end
 
@@ -149,7 +112,7 @@ init_timer()
 
 tmr.register(pump_timer, 5000, tmr.ALARM_SEMI, function (t) 
     print("Stop pump")
-    gpio.write(pump_pin, gpio.LOW) 
+    pump_stop()
     end)
 
 -- Buttons polling (ADC)
@@ -197,9 +160,9 @@ function set_pump(m, pl)
     m:publish("/water/stat/pump", "pump: " .. pl, 0, 0,
             function(m) print("pump: " .. pl) end)
     if pl == "0" then 
-        gpio.write(pump_pin, gpio.LOW)
+        pump_run()
     else
-        gpio.write(pump_pin, gpio.HIGH) 
+        pump_stop() 
     end
 end
 
@@ -208,7 +171,7 @@ function run(m, pl)
             function(m) print("run: " .. pl) end)
     close_all()
     switch_valve(tonumber(pl))
-    gpio.write(pump_pin, gpio.HIGH)
+    pump_run()
     int = timers[tonumber(pl)] * 1000
     print("int: " .. int)
     tmr.interval(pump_timer, int) 
@@ -219,7 +182,7 @@ function stop(m)
     m:publish("/water/stat/mode", "stop", 0, 0,
             function(m) print("stop") end)
     close_all()
-    gpio.write(pump_pin, gpio.LOW)
+    pump_stop()
 end
     
 -- As part of the dispatcher algorithm, this assigns a topic name as a key or
@@ -250,8 +213,10 @@ m:on("connect", function(m)
 
     -- Subscribe to the topic where the ESP8266 will get commands from
     m:subscribe("/water/cmd/#", 0,
-        function(m) print("Subscribed to CMD Topic") end)
-        
+        function(m) 
+            print("Subscribed to CMD Topic") 
+            pump_stop()
+        end) 
 end)
 
 
