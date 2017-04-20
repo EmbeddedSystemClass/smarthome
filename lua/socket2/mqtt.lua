@@ -2,7 +2,7 @@
 -- function dispatcher based on topic and message content
 m_dis = {}
 
-MQTT_CLIENTID = "socket1"
+MQTT_CLIENTID = "socket2"
 MQTT_HOST = "192.168.1.206"
 MQTT_PORT = 1883
 
