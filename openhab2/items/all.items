@@ -1,23 +1,36 @@
 Basement Monitor Group All
 
+Group gComm
 Group gHall
 Group gHallValues
+Group gKitchen
 
 Number chart_period ""
 
 Group gTemperature (All) // Contains all temperature sensors
 
 Switch Sock1 "Торшер" <light> (gHall) {mqtt=">[mysensors:/socket1/cmd/relay1:command:ON:1],>[mysensors:/socket1/cmd/relay1:command:OFF:0],<[mysensors:/socket1/stat/relay1/:state:default]"}
+
 Switch Sock2 "Спот" <light> (gHall) {mqtt=">[mysensors:/socket2/cmd/relay1:command:ON:1],>[mysensors:/socket2/cmd/relay1:command:OFF:0],<[mysensors:/socket2/stat/relay1/:state:default]"}
-Number Water "Полив" <water> (gHall) {mqtt=">[mysensors:/water/cmd/stop:command:0:1],>[mysensors:/water/cmd/run:command:1:1],>[mysensors:/water/cmd/run:command:2:2],>[mysensors:/water/cmd/run:command:3:3],>[mysensors:/water/cmd/run:command:4:4],>[mysensors:/water/cmd/run:command:5:5]"}
+
+Switch Kitchentable "Столешница" <light> (gHall) {mqtt=">[mysensors:/kitchendesk/cmd/power:command:ON:1],>[mysensors:/kitchendesk/cmd/power:command:OFF:0],<[mysensors:/kitchendesk/state/power:state:default]"}
+
+Number Water "" <water> (gHall) {mqtt=">[mysensors:/water/cmd/stop:command:0:1],>[mysensors:/water/cmd/run:command:1:1],>[mysensors:/water/cmd/run:command:2:2],>[mysensors:/water/cmd/run:command:3:3],>[mysensors:/water/cmd/run:command:4:4],>[mysensors:/water/cmd/run:command:5:5],<[mysensors:/water/state/status:state:default]""}
 
 String Uptime "Uptime [%s]" <clock> (gHall) 	{mqtt="<[mysensors:/weather/stat/uptime:state:default]"}
-Number Pir "Движение [MAP(pir.map):%s]" <motion> (gHall)      {mqtt="<[mysensors:/pir/stat/motion:state:default]"}
+
+Number Pir "Движение [MAP(pir.map):%s]" <motion> (gComm)      {mqtt="<[mysensors:/pir/stat/motion:state:default]"}
+
+Number Pasha "Паша [MAP(athome.map):%s]" <motion> (gHall, gComm)      {mqtt="<[mysensors:/presence/mi:state:default]"}
+
+Number Alina "Алина [MAP(athome.map):%s]" <motion> (gHall, gComm)      {mqtt="<[mysensors:/presence/iphone:state:default]"}
 
 //Dimmer Dim "Blue Led [%d %%]" () {mqtt=">[mysensors:/weather/cmd/dim:command:*:default]"}
 
 Number Temper "Температура [%.1f °C]"    <temperature>    (gHall, gHallValues)      {mqtt="<[mysensors:/weather/stat/temp:state:default]"}
+
 Number DHTTemper "Температура DHT [%.1f °C]"    <temperature>    ()      {mqtt="<[mysensors:/weather/stat/dhttemp:state:default]"}
+
 Number Humidity "Влажность [%d%%]"    <humidity>    (gHall, gHallValues)      {mqtt="<[mysensors:/weather/stat/humi:state:default]"}
 
 Frame label="Charts"
