@@ -1,13 +1,6 @@
  
- -- Config
-local pin = 4            --> GPIO2
-local value = gpio.HIGH
-
 abort = false
 
--- Initialise the pin
-gpio.mode(pin, gpio.OUTPUT)
-gpio.write(pin, value)
 -- Initialize PUMP pin
 gpio.mode(0, gpio.OUTPUT)
 gpio.write(0, gpio.LOW)
