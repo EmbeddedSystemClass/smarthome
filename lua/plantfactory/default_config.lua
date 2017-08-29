@@ -1,6 +1,6 @@
 -- GPIOS
-GPIO_LED = 7
-GPIO_SWITCH = 6
+GPIO_LED = 4
+GPIO_SWITCH = 1
 GPIO_BUTTON = 3
 
 -- WiFi networks list in format [SSID] = password
