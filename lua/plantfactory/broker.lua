@@ -12,12 +12,18 @@ end
 
 local function pump_off(m)
     gpio.write(GPIO_SWITCH, gpio.LOW)
-    m:publish(MQTT_MAINTOPIC .. '/state/power', "OFF", 0, 1)
+    m:publish(MQTT_MAINTOPIC .. '/state/pump', "0", 0, 1)
 end
 
 local function pump_on(m)
     gpio.write(GPIO_SWITCH, gpio.HIGH)
-    m:publish(MQTT_MAINTOPIC .. '/state/power', "ON", 0, 1)
+    m:publish(MQTT_MAINTOPIC .. '/state/pump', "1", 0, 1)
+end
+
+local function stop(m)
+    pump_off(m)
+    tmr.stop(PUMP_ALARM_ID)
+    pump_timeout = 0
 end
 
 -- debounce
@@ -47,11 +53,9 @@ end
 local function toggle_power()
     LedBlink(100)
 	if gpio.read(GPIO_SWITCH) == gpio.HIGH then
-		gpio.write(GPIO_SWITCH, gpio.LOW)
-		m:publish(MQTT_MAINTOPIC .. '/state/power', "OFF", 0, 1)
+		pump_off()
 	else
-		gpio.write(GPIO_SWITCH, gpio.HIGH)
-		m:publish(MQTT_MAINTOPIC .. '/state/power', "ON", 0, 1)
+		pump_on()
     end
 end
 
@@ -102,5 +106,6 @@ gpio.mode(GPIO_SWITCH, gpio.OUTPUT)
 gpio.mode(GPIO_BUTTON, gpio.INT)
 gpio.trig(GPIO_BUTTON, 'down', debounce(toggle_power))
 dispatcher[MQTT_MAINTOPIC .. '/cmd/power'] = switch_power
+dispatcher[MQTT_MAINTOPIC .. '/cmd/stop'] = stop
 dispatcher[MQTT_MAINTOPIC .. '/cmd/filltank'] = fill_tank
 m:connect(MQTT_HOST, MQTT_PORT, 0, 1)
