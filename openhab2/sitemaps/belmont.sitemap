@@ -1,0 +1,50 @@
+sitemap belmont label="Home" {
+Frame {
+	Group item=gComm label="Общее"
+	Group item=gHall label="Зал"
+	Group item=gKitchen label="Кухня"
+	Group item=gBedroom label="Спальня"
+	Group item=gCorridor label="Коридор"
+	Group item=gWater label="Полив"
+}
+
+Frame { 
+	Text label="Кухня" icon="kitchen" {
+    		Frame label="Кухня" {
+			Text item=Temper
+			Switch item=Kitchentable icon="light"
+		}
+	}
+	Text label="Коридор" {
+    		Frame label="Кухня" {
+			Text item=Temper
+		}
+	} 
+	Text label="Зал" {
+    		Frame label="Зал" {
+			Switch item=Sock1 icon="light"
+			Switch item=Sock2 icon="light"
+			Switch item=Water mappings=[0="Стоп", 1="Гр1", 2="Гр2", 3="Гр3", 4="Гр4", 5="Гр5"]
+    		}
+	}
+	Text label="Общее" {
+    		Frame label="Общее" {
+			Text item=Temper
+			Text item=Humidity
+			Text item=Uptime
+			Text item=Pasha
+			Text item=Alina
+			Text item=Pir mappings=["1"="Да", "0"="Нет", "Undefined"="n/a"]
+			Frame {	
+				Chart item=gHallValues period=d refresh=1000 visibility=[chart_period==0, chart_period=="Undefined"]
+				Chart item=gHallValues period=W refresh=1000 visibility=[chart_period==1]
+				Chart item=gHallValues period=M refresh=1000 visibility=[chart_period==2]
+		 		Chart item=gHallValues period=Y refresh=1000 visibility=[chart_period==3]
+				Switch item=chart_period mappings=[0="День", 1="Неделя", 2="Месяц", 3="Год"]
+    			}
+    		}
+	}
+}
+}
+
+
