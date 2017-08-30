@@ -1,9 +1,5 @@
 local FLOOD_TRESHOLD = 400
 
--- Configure LED
-gpio.mode(GPIO_FLOOD, gpio.OUTPUT)
-LedOff()
-
 -- Init ADC
 adc.force_init_mode(adc.INIT_ADC)
 
