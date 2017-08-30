@@ -55,13 +55,13 @@ function connectWiFi(ssid_list)
         tmr.alarm(WIFI_ALARM_ID, 2000, tmr.ALARM_AUTO, wifi_watch)
     else
         print("SSID not found")
-        LedFlicker(50, 100, 5)
+        LedFlicker(50, 50, 10)
     end
 end
 
 -- configure WIFI network
 function configureWiFi()
-    LedFlicker(50, 500, 10)
+    LedFlicker(50, 300, 15)
     wifi.setmode(wifi.STATION)
     if tablelen(WIFI_AUTH) > 1 then
         -- scan available networks
@@ -79,20 +79,18 @@ function wifi_watch()
     if status == wifi.STA_GOTIP and wifiReady == 0 then
         wifiReady = 1
         print("WiFi: connected with " .. wifi.sta.getip())
-        LedBlink(400)
+        LedBlink(1000)
         if TELNET_MODULE == 1 then
             load_lib("telnet")
         end
         load_lib("watersensor")
         load_lib("broker")
     elseif status == wifi.STA_GOTIP and wifiReady == 1 then
-        if firstPass == 0 then
-            --load_lib("http")
-            firstPass = 1
-        end
+        -- Alive Flicker
+        LedFlicker(40, 10000, 1)
     else
         wifiReady = 0
-        LedFlicker(50, 500, 10)
+        LedFlicker(50, 300, 15)
         print("WiFi: (re-)connecting")
     end
 end
