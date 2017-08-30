@@ -19,6 +19,7 @@ end
 
 -- Single LED blink
 function LedBlink(ms)
+    flkr_state = 0
     LedOn()
     tmr.alarm(WIFI_LED_BLINK_ALARM_ID, ms, tmr.ALARM_SINGLE, LedOff)
 end
