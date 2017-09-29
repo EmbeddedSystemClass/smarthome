@@ -25,7 +25,7 @@ local count = 0
 local time = 0
 
 -- Use remote controlled pump or local controlled pump
-local use_remote_pump = true
+local use_remote_pump = false
 
 
 -- Init ADC
@@ -112,7 +112,7 @@ init_timer()
 
 tmr.register(pump_timer, 5000, tmr.ALARM_SEMI, function (t) 
     print("Stop pump")
-    pump_stop()
+    stop(m)
     end)
 
 -- Buttons polling (ADC)
@@ -146,7 +146,7 @@ end)
 
 function move_servo(m, pl)
     -- Confirm
-    m:publish("/water/stat/servo", "servo: " .. pl, 0, 0,
+    m:publish("/water/state/servo", "servo: " .. pl, 0, 0,
             function(m) print("servo: " .. pl) end)
 
     local args = {}
@@ -157,7 +157,7 @@ function move_servo(m, pl)
 end
 
 function set_pump(m, pl)
-    m:publish("/water/stat/pump", "pump: " .. pl, 0, 0,
+    m:publish("/water/state/pump", "pump: " .. pl, 0, 0,
             function(m) print("pump: " .. pl) end)
     if pl == "0" then 
         pump_run()
@@ -167,7 +167,7 @@ function set_pump(m, pl)
 end
 
 function run(m, pl)
-    m:publish("/water/stat/mode", "run: " .. pl, 0, 0,
+    m:publish("/water/state/mode", "run: " .. pl, 0, 0,
             function(m) print("run: " .. pl) end)
     close_all()
     switch_valve(tonumber(pl))
@@ -179,8 +179,9 @@ function run(m, pl)
 end
 
 function stop(m)
-    m:publish("/water/stat/mode", "stop", 0, 0,
-            function(m) print("stop") end)
+    --m:publish("/water/state/mode", "stop", 0, 0,
+    --        function(m) print("stop") end)
+    m:publish("/water/state/status", "0", 0, 0, nil)
     close_all()
     pump_stop()
 end
@@ -191,9 +192,9 @@ m_dis["/water/cmd/servo"] = move_servo --<valve num>,<position>
 m_dis["/water/cmd/pump"] = set_pump --<0/1> - pump state
 m_dis["/water/cmd/run"] = run --<valve num>
 m_dis["/water/cmd/stop"] = stop --<any payload> - stop all
-m_dis["/water/cmd/trim_closed"] = set_trimmer_closed --<valve num> closed valve position
-m_dis["/water/cmd/trim_opened"] = set_trimmer_opened --<valve num> opened valve position
-m_dis["/water/cmd/time"] = set_timer --<valve num> time to run valve
+m_dis["/water/cmd/trim_closed"] = set_trimmer_closed --<valve num>,<pos> - closed valve position
+m_dis["/water/cmd/trim_opened"] = set_trimmer_opened --<valve num>,<pos> - opened valve position
+m_dis["/water/cmd/time"] = set_timer --<valve num>,<time> - time to run valve
 
 -- initialize mqtt client with keepalive timer of 60sec
 m = mqtt.Client(MQTT_CLIENTID, 60, "", "") -- Living dangerously. No password!
