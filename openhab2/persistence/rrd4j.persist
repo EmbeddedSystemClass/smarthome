@@ -10,5 +10,3 @@ Items {
 	Temper : strategy = everySecond, restoreOnStartup
 	Humidity : strategy = everySecond, restoreOnStartup
 }
-}
-}

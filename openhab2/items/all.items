@@ -15,7 +15,9 @@ Switch Sock2 "Спот" <light> (gHall) {mqtt=">[mysensors:/socket2/cmd/relay1:c
 
 Switch Kitchentable "Столешница" <light> (gHall) {mqtt=">[mysensors:/kitchendesk/cmd/power:command:ON:1],>[mysensors:/kitchendesk/cmd/power:command:OFF:0],<[mysensors:/kitchendesk/state/power:state:default]"}
 
-Number Water "" <water> (gHall) {mqtt=">[mysensors:/water/cmd/stop:command:0:1],>[mysensors:/water/cmd/run:command:1:1],>[mysensors:/water/cmd/run:command:2:2],>[mysensors:/water/cmd/run:command:3:3],>[mysensors:/water/cmd/run:command:4:4],>[mysensors:/water/cmd/run:command:5:5],<[mysensors:/water/state/status:state:default]""}
+Number Water "" <water> (gHall) {mqtt=">[mysensors:/water/cmd/stop:command:0:1],>[mysensors:/water/cmd/run:command:1:1],>[mysensors:/water/cmd/run:command:2:2],>[mysensors:/water/cmd/run:command:3:3],>[mysensors:/water/cmd/run:command:4:4],>[mysensors:/water/cmd/run:command:5:5],<[mysensors:/water/state/status:state:default]"}
+
+Switch Plants "Бак" <water> (gHall) {mqtt=">[mysensors:/plantfactory/cmd/filltank:command:ON:1],>[mysensors:/plantfactory/cmd/stop:command:OFF:0],<[mysensors:/plantfactory/state/pump:state:default]"}
 
 String Uptime "Uptime [%s]" <clock> (gHall) 	{mqtt="<[mysensors:/weather/stat/uptime:state:default]"}
 
@@ -29,11 +31,11 @@ Number Alina "Алина [MAP(athome.map):%s]" <motion> (gHall, gComm)      {mqt
 
 Number Temper "Температура [%.1f °C]"    <temperature>    (gHall, gHallValues)      {mqtt="<[mysensors:/weather/stat/temp:state:default]"}
 
-Number DHTTemper "Температура DHT [%.1f °C]"    <temperature>    ()      {mqtt="<[mysensors:/weather/stat/dhttemp:state:default]"}
+Number DHTTemper "Температура DHT [%.1f °C]"    <temperature>    (gHall, gHallValues)      {mqtt="<[mysensors:/weather/stat/dhttemp:state:default]"}
 
 Number Humidity "Влажность [%d%%]"    <humidity>    (gHall, gHallValues)      {mqtt="<[mysensors:/weather/stat/humi:state:default]"}
 
-Frame label="Charts"
+Frame label="Charts" 
 {
 //change period to 4h for 4 hours, D for 1 day, 3D for 3 days, W for 1 Week, 3W for 3 we
 Chart item=gHall period=h refresh=1000
