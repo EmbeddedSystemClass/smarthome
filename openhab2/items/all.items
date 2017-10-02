@@ -5,6 +5,7 @@ Group gHall
 Group gHallValues
 Group gKitchen
 Group gLight
+Group gTerrace
 Group gTemperature (All)
 
 Number chart_period ""
@@ -24,8 +25,9 @@ Number Alina "Алина [MAP(athome.map):%s]" <girl_3> (gHall, gComm)      {mqt
 
 //Dimmer Dim "Blue Led [%d %%]" () {mqtt=">[mysensors:/weather/cmd/dim:command:*:default]"}
 
-Number Temper "Температура [%.1f °C]"    <temperature>    (gHall,gHallValues,gTemperature)      {mqtt="<[mysensors:/weather/stat/temp:state:default]"}
-Number DHTTemper "Температура DHT [%.1f °C]"    <temperature>    (gHall,gHallValues,gTemperature)      {mqtt="<[mysensors:/weather/stat/dhttemp:state:default]"}
+Number TemperRoom "Комната [%.1f °C]"    <temperature>    (gHall,gHallValues,gTemperature)      {mqtt="<[mysensors:/weather/state/temp/16031B:state:default]"}
+Number TemperTerrace "Балкон [%.1f °C]"    <temperature>    (gTerrace,gTemperature)      {mqtt="<[mysensors:/terrace/state/temp:state:default]"}
+Number TemperTerraceDHT "DHT [%.1f °C]"    <temperature>    (gTerrace,gTemperature)      {mqtt="<[mysensors:/terrace/state/dhttemp:state:default]"}
 
 Number Humidity "Влажность [%d%%]"    <humidity>    (gHall, gHallValues)      {mqtt="<[mysensors:/weather/stat/humi:state:default]"}
 

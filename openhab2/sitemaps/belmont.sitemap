@@ -1,6 +1,6 @@
 sitemap belmont label="Home" {
 Frame {
-	Group item=gHall label="Зал"
+	Group item=gHall label="Комната"
 	Group item=gKitchen label="Кухня"
 	Group item=gBedroom label="Спальня"
 	Group item=gCorridor label="Коридор"
@@ -20,15 +20,16 @@ Frame {
 			Text item=Temper
 		}
 	} 
-	Text label="Зал" icon="sofa" {
-		Frame label="Зал" {
+	Text label="Комната" icon="sofa" {
+		Frame label="Комната" {
 			Switch item=Sock1 icon="light"
 			Switch item=Sock2 icon="light"
+			Text item=TemperRoom label="Температура"
 		}
 	}
 	Text label="Балкон" icon="terrace" {
 		Frame label="Балкон" {
-			Text item=Temper
+			Text item=TemperTerrace label="Температура"
 		}
 	}
 	Text label="Полив" icon="grass" {
