@@ -33,7 +33,7 @@ m:on('connect', function(m)
                 if (temp ~= 85.0) then
                     str = string.format("%0.1f", temp)
                 else
-                    str = "error"
+                    str = "break"
                 end
                 m:publish("/"..MQTT_CLIENTID.."/state/temp/"..id, str, 0, 0, nil)
             end
