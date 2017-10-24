@@ -6,6 +6,7 @@ Group gHallValues
 Group gKitchen
 Group gLight
 Group gTerrace
+Group gOutside
 Group gTemperature (All)
 
 Number chart_period ""
@@ -25,9 +26,17 @@ Number Alina "Алина [MAP(athome.map):%s]" <girl_3> (gHall, gComm)      {mqt
 
 //Dimmer Dim "Blue Led [%d %%]" () {mqtt=">[mysensors:/weather/cmd/dim:command:*:default]"}
 
+/*
 Number TemperRoom "Комната [%.1f °C]"    <temperature>    (gHall,gHallValues,gTemperature)      {mqtt="<[mysensors:/weather/state/temp/16031B:state:default]"}
+String TemperRoomError "[Ошибка]"    	 <temperature>	  (gTemperature)	 {mqtt="<[mysensors:/weather/state/temp/16031B:state:default]"}
 Number TemperTerrace "Балкон [%.1f °C]"    <temperature>    (gTerrace,gTemperature)      {mqtt="<[mysensors:/terrace/state/temp:state:default]"}
 Number TemperTerraceDHT "DHT [%.1f °C]"    <temperature>    (gTerrace,gTemperature)      {mqtt="<[mysensors:/terrace/state/dhttemp:state:default]"}
+*/
+
+String TemperRoom "Комната [JS(tempsensor.js):%s]"    	<temperature> (gHall,gHallValues,gTemperature) 	{mqtt="<[mysensors:/terrace/state/temp/16031B:state:default]"}
+String TemperTerrace "Балкон [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/000090:state:default]"}
+String TemperOutside  "Улица [JS(tempsensor.js):%s]" 	<temperature> (gOutside,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/000091:state:default]"}
+
 
 Number Humidity "Влажность [%d%%]"    <humidity>    (gHall, gHallValues)      {mqtt="<[mysensors:/weather/stat/humi:state:default]"}
 
