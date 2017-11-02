@@ -1,0 +1,22 @@
+rule "Nobody at home"
+	when
+		Item Pasha changed to 0 or
+		Item Alina changed to 0
+	then
+		if (Pasha.state == 0 && Alina.state == 0) {
+        	gLight.sendCommand(0)
+        	if (Valves.state == 1) {
+        		Valves.sendCommand(0)	
+        	}
+        }
+end
+
+rule "Welcome home"
+	when
+		Item Pasha changed to 1 or 
+		Item Alina changed to 1
+	then
+		if (Valves.state == 0) {
+        	Valves.sendCommand(1)
+        }
+end

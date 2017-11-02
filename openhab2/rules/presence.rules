@@ -1,0 +1,14 @@
+rule "Pasha at home"
+	when
+		Item MiWF received update or
+		Item MiBT received update
+	then
+		if (MiWF.state == 1 || MiBT.state == 1) {	
+			logDebug("presence","Pasha is at home")
+	        sendCommand(Pasha, 1)  
+        }
+        if (MiWF.state == 0 && MiBT.state == 0) {	
+			logDebug("presence","Pasha is absent")
+	        sendCommand(Pasha, 0)  
+        }
+end
