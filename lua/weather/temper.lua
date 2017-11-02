@@ -2,6 +2,7 @@ t = require("ds18b20")
 
 temperature = {}
 local REQUEST_PERIOD = 10000
+local MAX_ATTEMPTS = 3
 local index = 1
 
 t.setup(GPIO_ONEWIRE)
@@ -43,15 +44,20 @@ function request_sensors_onebyone()
 end
 
 function request_sensors()
-  for num, addr in pairs(addrs) do  
-    local temp = t.read(addr)
+  for num, addr in pairs(addrs) do
+    local count = 0
+    local temp
+    repeat
+        temp = t.read(addr)
+        count = count + 1
+    until ((temp ~= nil ) or (count >= MAX_ATTEMPTS))
     if (temp ~= nil ) then
         temperature[get_sensor_id(addr)] = temp
         print("Sensor "..get_sensor_id(addr)..": "..temp.."'C")
     else
         temperature[get_sensor_id(addr)] = 85.0
         print("Sensor "..get_sensor_id(addr)..": line break")
-    end   
+    end 
   end
 end
 

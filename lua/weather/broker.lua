@@ -42,7 +42,7 @@ m:on('connect', function(m)
         --publish humidity data
         if (dhttemp ~= nil) then
             local str = string.format("%0.1f", dhttemp)
-            m:publish("/"..MQTT_CLIENTID.."/state/dht/temp", str, 0, 0, nil)return
+            m:publish("/"..MQTT_CLIENTID.."/state/dht/temp", str, 0, 0, nil)
         end
         if (dhthumi ~= nil) then
             local str = string.format("%d", dhthumi)

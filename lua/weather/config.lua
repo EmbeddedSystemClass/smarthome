@@ -1,6 +1,6 @@
 -- GPIOS
 GPIO_LED = 4
-GPIO_DHT = 5
+GPIO_DHT = 6
 GPIO_ONEWIRE = 7
 
 -- WiFi networks list in format [SSID] = password
