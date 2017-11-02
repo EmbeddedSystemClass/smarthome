@@ -8,5 +8,7 @@ Strategies {
 Items {
 	// let's only store temperature values in rrd
 	TemperRoom : strategy = everySecond, restoreOnStartup
-	Humidity : strategy = everySecond, restoreOnStartup
+	TemperTerrace : strategy = everySecond, restoreOnStartup
+	TemperOutside : strategy = everySecond, restoreOnStartup
+	HumidityTerrace : strategy = everySecond, restoreOnStartup
 }
