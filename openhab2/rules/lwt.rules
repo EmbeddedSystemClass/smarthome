@@ -1,0 +1,7 @@
+rule "Terrace died"
+	when
+		Item LwtTerrace changed to died
+	then
+		gTerrace.sendCommand("break")
+		logDebug("presence","Terrace is dead")
+end

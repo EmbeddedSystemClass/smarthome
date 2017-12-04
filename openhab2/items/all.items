@@ -10,6 +10,7 @@ Group gOutside
 Group gWater
 Group gGraphTemper
 Group gGraphHumi
+Group gCorridor
 Group gTemperature (All)
 
 Number chart_period ""
@@ -23,7 +24,7 @@ Switch Plants "Помпа" <water> (gHall) {mqtt=">[mysensors:/plantfactory/cmd/
 
 String Uptime "Uptime [%s]" <clock> (gHall) 	{mqtt="<[mysensors:/weather/stat/uptime:state:default]"}
 
-Number Pir "Движение [MAP(pir.map):%s]" <motion> (gComm)      {mqtt="<[mysensors:/pir/stat/motion:state:default]"}
+Number Pir "Движение [MAP(pir.map):%s]" <motion> (gComm,gCorridor)      {mqtt="<[mysensors:/pir/stat/motion:state:default]"}
 
 Number MiWF "" <boy_1> (gHall, gComm)      {mqtt="<[mysensors:/presence/mi:state:default]"}
 Number MiBT "" <boy_1> (gHall, gComm)      {mqtt="<[mysensors:/presence/mibt:state:default]"}
@@ -40,12 +41,14 @@ Number TemperTerrace "Балкон [%.1f °C]"    <temperature>    (gTerrace,gTe
 Number TemperTerraceDHT "DHT [%.1f °C]"    <temperature>    (gTerrace,gTemperature)      {mqtt="<[mysensors:/terrace/state/dhttemp:state:default]"}
 */
 
-String TemperRoom "Комната [JS(tempsensor.js):%s]"    	<temperature> (gHall,gGraphTemper,gHallValues,gTemperature) 	{mqtt="<[mysensors:/terrace/state/temp/16031B:state:default]"}
+String TemperRoom "Комната [JS(tempsensor.js):%s]"    	<temperature> (gHall,gGraphTemper,gHallValues,gTemperature) 	{mqtt="<[mysensors:/terrace/state/temp/000091:state:default]"}
 String TemperTerrace "Балкон [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gGraphTemper,gHallValues,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/000090:state:default]"}
-String TemperOutside  "Улица [JS(tempsensor.js):%s]" 	<temperature> (gOutside,gGraphTemper,gHallValues,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/000091:state:default]"}
+String TemperOutside  "Улица [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gOutside,gGraphTemper,gHallValues,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/1504CD:state:default]"}
 String TemperDHT  	"DHT [JS(tempsensor.js):%s]" 		<temperature> (gTerrace,gTemperature) 			{mqtt="<[mysensors:/terrace/state/dht/temp:state:default]"}
+String LwtTerrace  	"" (gTerrace) 	{mqtt="<[mysensors:/lwt/terrace:state:default]"}
 
-Number HumidityTerrace "Влажность [JS(humisensor.js):%s]" <humidity>    (gHall,gHallValues,gGraphHumi)      {mqtt="<[mysensors:/terrace/state/dht/humi:state:default]"}
+
+Number HumidityTerrace "Влажность [JS(humisensor.js):%s]" <humidity>    (gHallValues,gGraphHumi)      {mqtt="<[mysensors:/terrace/state/dht/humi:state:default]"}
 
 Number Valves "Краны" <faucet> (gWater) {mqtt=">[mysensors:/aquastor/cmd/valve:command:0:OFF],>[mysensors:/aquastor/cmd/valve:command:1:ON],<[aquastor:/plantfactory/state/valve:state:default]"}
 String ValveState "Cостояние [MAP(valve.map):%s]" <faucet> (gWater) 	{mqtt="<[mysensors:/aquastor/state/valve:state:default]"}
