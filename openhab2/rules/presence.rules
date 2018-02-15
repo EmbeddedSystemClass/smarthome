@@ -8,7 +8,22 @@ rule "Pasha at home"
 	        sendCommand(Pasha, 1)  
         }
         if (MiWF.state == 0 && MiBT.state == 0) {	
-			logDebug("presence","Pasha is absent")
-	        sendCommand(Pasha, 0)  
+			logDebug("presence","Pasha is away")
+	        sendCommand(Pasha, 0)
+        }
+end
+
+rule "Alina at home"
+	when
+		Item Mi5CWF received update or
+		Item Mi5CBT received update
+	then
+		if (Mi5CWF.state == 1 || Mi5CBT.state == 1) {	
+			logDebug("presence","Alina is at home")
+	        sendCommand(Alina, 1)  
+        }
+        if (Mi5CWF.state == 0 && Mi5CBT.state == 0) {	
+			logDebug("presence","Alina is away")
+	        sendCommand(Alina, 0)
         }
 end

@@ -28,11 +28,14 @@ Number Pir "Движение [MAP(pir.map):%s]" <motion> (gComm,gCorridor)      
 
 Number MiWF "" <boy_1> (gHall, gComm)      {mqtt="<[mysensors:/presence/mi:state:default]"}
 Number MiBT "" <boy_1> (gHall, gComm)      {mqtt="<[mysensors:/presence/mibt:state:default]"}
+
+Number Mi5CWF "" <girl_3> (gHall, gComm)      {mqtt="<[mysensors:/presence/mi5c:state:default]"}
+Number Mi5CBT "" <girl_3> (gHall, gComm)      {mqtt="<[mysensors:/presence/mi5cbt:state:default]"}
+
+
 Number Pasha "Паша [MAP(athome.map):%s]" <boy_1> (gHall, gComm)
-
-Number Alina "Алина [MAP(athome.map):%s]" <girl_3> (gHall, gComm)      {mqtt="<[mysensors:/presence/iphone:state:default]"}
-
-//Dimmer Dim "Blue Led [%d %%]" () {mqtt=">[mysensors:/weather/cmd/dim:command:*:default]"}
+Number Alina "Алина [MAP(athome.map):%s]" <girl_3> (gHall, gComm)
+//Number Alina "Алина [MAP(athome.map):%s]" <girl_3> (gHall, gComm)      {mqtt="<[mysensors:/presence/iphone:state:default]"}
 
 /*
 Number TemperRoom "Комната [%.1f °C]"    <temperature>    (gHall,gHallValues,gTemperature)      {mqtt="<[mysensors:/weather/state/temp/16031B:state:default]"}
