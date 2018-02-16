@@ -2,7 +2,6 @@ sitemap belmont label="Home" {
 	Frame {
 		Group item=gHall label="Комната"
 		Group item=gKitchen label="Кухня"
-		Group item=gBedroom label="Спальня"
 		Group item=gCorridor label="Коридор"
 		Group item=gLight label="Свет" icon="light"
 		Group item=gTemperature label="Температура" icon="temperature"
