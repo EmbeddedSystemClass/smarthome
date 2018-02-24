@@ -1,7 +1,7 @@
 -- GPIOS
-GPIO_LED = 4
-GPIO_SWITCH = 5
-GPIO_BUTTON = 3
+GPIO_LED = GPIO2
+GPIO_SWITCH = GPIO5
+GPIO_BUTTON = GPIO0
 
 -- WiFi networks list in format [SSID] = password
 WIFI_AUTH = {
