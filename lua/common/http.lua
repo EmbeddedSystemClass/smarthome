@@ -1,80 +1,64 @@
+function exec_template(fname)
+  file.open(fname, "r")
+  local txt = {}
+  
+  while true do
+    ln = file.readline()
+    if (ln == nil) then break end
 
-local loggedin = 0
-local i = 1
-local relay_state = 0
-
-cmds = {
-    "relay R3 info\n",
-    "relay R3 on\n",
-    "relay R3 info\n",
-    "relay R3 off\n"
-}
-
-function set_relay_cb(c, relay, state)
-    if string.find(c, "Switch relay")~=nil then
-        conn:send("relay " .. relay .. " info\n")
+    for w in string.gmatch(ln, "{{$[^}]+}}") do
+      f = loadstring("return ".. string.sub(w,4,-3))
+      local nw = string.gsub(w, "[^%a%s]", "%%%1")
+      ln = string.gsub(ln, nw, f())
     end
-    if string.find(c, "bt6500#")~=nil then
-        conn:send("relay " .. relay .. " " .. state .. "\n")
-    end
-    if string.find(c, "service relay, Opened")~=nil then
-        relay_state = 1
-        print("Relay " .. " state: ", relay_state)
-        print("Connection closed")
-        conn:close()
-    end
-    if string.find(c, "service relay, Closed")~=nil then
-        relay_state = 0
-        print("Relay state: ", relay_state)
-        print("Connection closed")
-        conn:close()
-    end
-end
-
-function login_cb(c)
-    if string.find(c, "bt6500 login:")~=nil then
-            conn:send("admin\n")
-    end 
-    if string.find(c, "Password:")~=nil then
-        conn:send("12345\n")
-    end    
-    if string.find(c, "bt6500#")~=nil then
-        print("Logged in")
-        loggedin=1
-    end
-end
-
-function commands_cb(c)
-    if cmds[i]==nil then   
-        conn:close()
-        print("Connection closed")
-    end
-    if string.find(c, "bt6500#")~=nil then
-        conn:send(cmds[i])
-        i=i+1
-    end 
-
-end
-
-function connect()
-    print("Connecting..")
-    conn=net.createConnection(net.TCP, 0)
     
-    conn:on("receive", function(conn, c) 
-        print(c)
-        
-        if loggedin==0 then
-            login_cb(c)
-        end
-
-        --commands_cb(c);
-        
-        set_relay_cb(c, "R3", "off")
-        
-    end )
-    
-    conn:connect(23,"192.168.14.19")
-
+    txt[#txt+1] = ln
+  end
+  file.close()
+  return table.concat(txt, "")
 end
 
-connect()
+function load_file(fname, ftxt, cmpl)
+  file.remove(fname)
+  file.open(fname, "w")
+  file.write(ftxt)
+  file.flush()
+  file.close()
+  if string.sub(fname, -3, -1) == "lua" and cmpl == true then
+    node.compile(fname)
+    file.remove(fname)
+  end
+end
+
+
+local pl = nil;
+
+if sv ~= nil then
+    sv:close()
+end
+sv = net.createServer(net.TCP, 10)
+
+sv:listen(80,function(conn)
+  conn:on("sent", function(conn, pl)
+    conn:close()
+    collectgarbage()
+  end)
+  conn:on("receive", function(conn, pl) 
+    local payload = pl;
+    if string.sub(pl, 0, 9) == "**LOAD**\n"  then
+      print("HTTP : File received...")
+      pl = string.sub(pl,10,-1)
+      local idx = string.find(pl,"\n")
+      local fname = string.sub(pl, 0, idx-1)
+      local ftxt = string.sub(pl, idx+1, -1)
+      load_file(fname, ftxt, true)
+    elseif string.sub(pl, 0, 12) == "**RESTART**\n" then
+      print("HTTP : Restarting")
+      node.restart()
+    else
+      print("HTTP : default page")
+      conn:send(exec_template("page.tmpl"))
+    end
+  end)
+end)
+print("HTTP server running...")

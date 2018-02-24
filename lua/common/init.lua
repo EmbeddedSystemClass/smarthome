@@ -1,57 +1,102 @@
- 
- -- Config
-local pin = 4            --> GPIO2
-local value = gpio.HIGH
-
-abort = false
-
--- Initialise the pin
-gpio.mode(pin, gpio.OUTPUT)
-gpio.write(pin, value)
-
-local ssid = "Wlan_WP2"
-local pass = "Chronion.7"
-
- function startup()
-    if abort == true then
-        print('startup aborted')
-        return
+-- safe library load
+function load_lib(fname)
+    function try_load(fname)
+        if file.open(fname) then
+            file.close()
+            local ret, err = pcall(function() dofile(fname) end)
+            if ret == false then
+                print(fname .. " -- load failed!")
+                print(err)
+            end
+            return ret
+        else
+            return false
+        end
     end
-    abort = true
-    -- otherwise, start up
-    dofile ("start.lua")
- end
- 
- --init.lua
- wifi.setmode(wifi.STATION)
- wifi.sta.config(ssid,pass)
- local n = 10
- wifi.sta.connect()
- tmr.alarm(1, 1000, 1, function()
-  if wifi.sta.getip()== nil then 
-  gpio.write(pin, gpio.LOW)
-  print("IP unavaiable, Waiting...")
-  gpio.write(pin, gpio.HIGH)
-  n = n - 1
-  if n == 0 then 
-    tmr.stop(1)
-    print("Wi-Fi connection error.")
-    dofile ("led.lua")
+
+    if try_load(fname..".lc") then return true end
+    if try_load(fname..".lua") then return true end
+    
+    print(fname .. ".lua/.lc -- not found!")
+    return false
+end
+
+-- get table length
+function tablelen(table)
+    local n = 0
+    for _ in pairs(table) do
+            n = n + 1
     end
- else
-  tmr.stop(1)
-  
- print("ESP8266 mode is: " .. wifi.getmode())
- print("The module MAC address is: " .. wifi.ap.getmac())
- print("Config done, IP is "..wifi.sta.getip())
- dofile ("telnet.lua")
- 
- tmr.alarm(1,5000,0,startup)
+    return n
+end
 
- end
- end)
+load_lib("gpio")
 
- 
+-- init all globals
+if not load_lib("config") then
+    load_lib("default_config")
+end
 
+load_lib("led")
 
- 
+local ssid, pass = nil
+local wifiReady = 0
+local firstPass = 0
+
+-- connect to WIFI network(s) from SSID list
+function connectWiFi(ssid_list)
+    for k,v in pairs(WIFI_AUTH) do
+        if ssid_list[k] then
+                ssid, pass = k, v
+                break
+        end
+    end
+    if ssid ~= nil then
+        print("Connecting to "..ssid)
+        wifi.sta.config(ssid, pass)
+        tmr.alarm(WIFI_ALARM_ID, 2000, tmr.ALARM_AUTO, wifi_watch)
+    else
+        print("SSID not found")
+        LedFlicker(50, 100, 5)
+    end
+end
+
+-- configure WIFI network
+function configureWiFi()
+    LedFlicker(50, 500, 10)
+    wifi.setmode(wifi.STATION)
+    if tablelen(WIFI_AUTH) > 1 then
+        -- scan available networks
+        wifi.sta.getap(connectWiFi)
+    else
+        -- connect to the predefined SSID
+        connectWiFi(WIFI_AUTH)
+    end
+end
+
+-- WIFI connection status checking
+function wifi_watch()
+    status = wifi.sta.status()
+    -- only do something if the status actually changed
+    if status == wifi.STA_GOTIP and wifiReady == 0 then
+        wifiReady = 1
+        print("WiFi: connected with " .. wifi.sta.getip())
+        LedBlink(400)
+        if TELNET_MODULE == 1 then
+            load_lib("telnet")
+        end
+        load_lib("broker")
+    elseif status == wifi.STA_GOTIP and wifiReady == 1 then
+        if firstPass == 0 then
+            load_lib("http")
+            firstPass = 1
+        end
+    else
+        wifiReady = 0
+        LedFlicker(50, 500, 10)
+        print("WiFi: (re-)connecting")
+    end
+end
+
+-- Configure
+configureWiFi()
