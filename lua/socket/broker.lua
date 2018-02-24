@@ -24,10 +24,10 @@ end
 -- actions
 local function switch_power(m, pl)
 	if pl == "ON" or pl == "1" then
-		gpio.write(GPIO_SWITCH, gpio.HIGH)
+		gpio.write(GPIO_SWITCH, gpio.LOW)
 		print("MQTT : plug ON for ", MQTT_CLIENTID)
 	elseif pl == "OFF" or pl == "0" then
-		gpio.write(GPIO_SWITCH, gpio.LOW)
+		gpio.write(GPIO_SWITCH, gpio.HIGH)
 		print("MQTT : plug OFF for ", MQTT_CLIENTID)
 	end
 end
