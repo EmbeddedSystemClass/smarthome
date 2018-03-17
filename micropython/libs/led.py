@@ -13,7 +13,6 @@ class Led:
     def Off(self):
         self.pin.value(self.inverted)
 
->>>
     def Toggle(self):
         self.pin.value(not self.pin.value())
 
