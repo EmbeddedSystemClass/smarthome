@@ -1,9 +1,7 @@
 
-import config
+import config, led, network, time
 
 def do_connect(ssid, password):
-    import network
-    import time
     tm = 0
     sta_if = network.WLAN(network.STA_IF)
     if not sta_if.isconnected():
@@ -21,7 +19,12 @@ def do_connect(ssid, password):
     return True
 
 def connect_wlan():
+    SysLed = led.SysLed()
+    SysLed.RunFlicker(500)
     for ssid, passwd in config.ssids:
         if do_connect(ssid, passwd):
+            SysLed.StopFlicker()
+            del(SysLed)
             return True
+    SysLed.RunFlicker(200)
     return False
