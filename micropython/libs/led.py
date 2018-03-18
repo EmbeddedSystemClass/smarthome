@@ -39,13 +39,14 @@ class Led:
         self.Off()
         del(self.tmr)
 
-    # def FadeFlick(self, ms = 50):
-    #     self.fled = machine.PWM(self.pin, freq = 1000)
-    #     self.fled.duty(0)
-    #     for i in range(ms):
-    #          self.fled.duty(self.fled.duty() + int(1023 / ms))
-    #          time.sleep_ms(1)
-    #     self.fled.duty(1023)
+    def FadeFlick(self, ms = 50):
+        self.fled = machine.PWM(self.pin, freq = 1000)
+        self.fled.duty(0)
+        for x in range(20):
+            #self.fled.duty(int(math.sin((x-10)/20*math.pi)*500+500))
+            self.fled.duty(int(math.log(x+1)*336))
+            time.sleep_ms(ms)
+        self.fled.duty(1023)
         
 
 class SysLed(Led):
