@@ -1,0 +1,31 @@
+{
+    "wlan":[
+        {
+            "ssid":"YOUR_SSID1",
+            "passwd":"YOUR_PASS1"
+        },
+        {
+            "ssid":"YOUR_SSID2",
+            "passwd":"YOUR_PASS2"
+        }
+    ],
+    "mqtt":{
+        "client_id":"MY_ID",
+        "brokers":[
+            {
+                "name":"localbroker",
+                "ip":"192.168.1.1",
+                "port":"1883",
+                "user":"",
+                "passwd":""
+            },
+            {
+                "name":"mqttcloud",
+                "ip":"m23.cloudmqtt.com",
+                "port":"1883",
+                "user":"YOUR_USER",
+                "passwd":"YOUR_PASS"
+            }
+        ]
+    }
+}
