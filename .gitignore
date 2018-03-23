@@ -7,3 +7,4 @@ output_elf
 !.project
 !.cproject
 !.settings
+config.json
