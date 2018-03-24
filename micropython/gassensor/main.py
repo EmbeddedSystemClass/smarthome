@@ -9,6 +9,8 @@ import network
 
 MQTT_SYSPUB_PERIOD = 1000 * 60 * 5
 
+clients = []
+
 #Load config file
 def load_config():
     try:
@@ -21,9 +23,9 @@ def load_config():
 #Callback to publish service data
 def servicepub_cb(timer):
     ip = wlan.getip()
-    m.servicepub(ip)
-    c.servicepub(ip)
-    sysled.Flick()
+    for client in clients:
+        client.servicepub(ip)
+        sysled.Flick()
 
 #Init blue LED
 sysled = led.SysLed()
@@ -43,23 +45,14 @@ wlan.connect()
 client_id = config['mqtt']['client_id'] + '-' \
     + ubinascii.hexlify(network.WLAN().config('mac')).decode()[-6:]
 
-#Connect to local broker
-m = mqtt.Client(client_id, config['mqtt']['brokers'][0]['ip'], 
-    int(config['mqtt']['brokers'][0]['port']), 
-    config['mqtt']['brokers'][0]['user'], 
-    config['mqtt']['brokers'][0]['passwd'])
-m.connect()
-m.servicepub(wlan.getip())
-sysled.Flick()
-
-#Connect to remote broker
-c = mqtt.Client(client_id, config['mqtt']['brokers'][1]['ip'], 
-    int(config['mqtt']['brokers'][1]['port']), 
-    config['mqtt']['brokers'][1]['user'], 
-    config['mqtt']['brokers'][1]['passwd'])
-c.connect()
-c.servicepub(wlan.getip())
-sysled.Flick()
+#Connect to brokers
+for broker in config['mqtt']['brokers']:
+    client = mqtt.Client(client_id, broker['ip'], int(broker['port']), 
+        broker['user'], broker['passwd'])
+    client.connect()
+    client.servicepub(wlan.getip())
+    clients.append(client)
+    sysled.Flick()
 
 #Init service data publish timer
 t = machine.Timer(-1)
