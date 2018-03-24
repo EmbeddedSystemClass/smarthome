@@ -1,11 +1,11 @@
-from wlan import *
+import sys
+import wifi
 import led
 import mqtt
 import machine
 import ujson
 import ubinascii
 import network
-import sys
 
 MQTT_SYSPUB_PERIOD = 1000 * 60 * 5
 
@@ -13,10 +13,10 @@ MQTT_SYSPUB_PERIOD = 1000 * 60 * 5
 def load_config():
     try:
         with open('config.json') as config_file:
-            config = ujson.load(config_file)
+            conf = ujson.load(config_file)
     except (OSError, ValueError):
         return None
-    return config
+    return conf
 
 #Callback to publish service data
 def servicepub_cb(timer):
@@ -36,7 +36,7 @@ if not config:
     sys.exit()
 
 #Connect to WIFI
-wlan = Wlan(config['wlan'])
+wlan = wifi.Wlan(config['wlan'])
 wlan.connect()
 
 #Form unique client ID with a MAC part
