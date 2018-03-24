@@ -1,4 +1,4 @@
-import config, led, network, time, ujson
+import led, network, time
 
 class Wlan():
     def __init__(self, networks):
@@ -28,8 +28,8 @@ class Wlan():
     def connect(self):
         sysled = led.SysLed()
         sysled.RunFlicker(500)
-        for network in self.networks:
-            if self.do_connect(network['ssid'], network['passwd']):
+        for wlan in self.networks:
+            if self.do_connect(wlan['ssid'], wlan['passwd']):
                 sysled.StopFlicker()
                 del(sysled)
                 return True
