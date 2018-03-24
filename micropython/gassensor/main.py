@@ -5,11 +5,18 @@ import machine
 import ujson
 import ubinascii
 import network
+import sys
 
 MQTT_SYSPUB_PERIOD = 1000 * 60 * 5
 
-with open('config.json') as config_file:
-    config = ujson.load(config_file)
+#Load config file
+def load_config():
+    try:
+        with open('config.json') as config_file:
+            config = ujson.load(config_file)
+    except (OSError, ValueError):
+        return None
+    return config
 
 #Callback to publish service data
 def servicepub_cb(timer):
@@ -18,12 +25,19 @@ def servicepub_cb(timer):
     c.servicepub(ip)
     sysled.Flick()
 
-#Connect to WIFI
-wlan = Wlan()
-wlan.connect()
-
 #Init blue LED
 sysled = led.SysLed()
+
+#Load configuration
+config = load_config()
+if not config:
+    print("Couldn't load /config.json")
+    sysled.RunFlicker(200)
+    sys.exit()
+
+#Connect to WIFI
+wlan = Wlan(config['wlan'])
+wlan.connect()
 
 #Form unique client ID with a MAC part
 client_id = config['mqtt']['client_id'] + '-' \

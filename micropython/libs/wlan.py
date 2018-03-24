@@ -1,7 +1,8 @@
-import config, led, network, time
+import config, led, network, time, ujson
 
 class Wlan():
-    def __init__(self):
+    def __init__(self, networks):
+        self.networks = networks
         self.sta_if = None
 
     def getip(self):
@@ -24,14 +25,13 @@ class Wlan():
         print('Connected (%s)' % self.sta_if.ifconfig()[0])
         return True
 
-
     def connect(self):
-        SysLed = led.SysLed()
-        SysLed.RunFlicker(500)
-        for ssid, passwd in config.ssids:
-            if self.do_connect(ssid, passwd):
-                SysLed.StopFlicker()
-                del(SysLed)
+        sysled = led.SysLed()
+        sysled.RunFlicker(500)
+        for network in self.networks:
+            if self.do_connect(network['ssid'], network['passwd']):
+                sysled.StopFlicker()
+                del(sysled)
                 return True
-        SysLed.RunFlicker(200)
+        sysled.RunFlicker(200)
         return False
