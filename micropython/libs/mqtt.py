@@ -3,12 +3,13 @@ import time, machine, ubinascii
 
 class MQTTClient(umqtt.robust.MQTTClient):
     RECONNECT_TIMEOUT = 5000
-    def __init__(self, client_id, broker, port = 1883, user = None, password = None):
+    KEEPALIVE_PERIOD = 60
+    def __init__(self, client_id, broker, port = 1883, user = None, password = None, keepalive = KEEPALIVE_PERIOD):
         self.id = client_id
         self.broker = broker
         self.connected = False
         self.tmr = None
-        umqtt.robust.MQTTClient.__init__(self, client_id, broker, port, user, password)
+        umqtt.robust.MQTTClient.__init__(self, client_id, broker, port, user, password, self.KEEPALIVE_PERIOD)
 
     def is_connected(self):
         return self.connected
@@ -42,6 +43,7 @@ class MQTTClient(umqtt.robust.MQTTClient):
 
 class Client(MQTTClient):
     def connect(self):
+        self.set_last_will("/lwt/"+self.client_id, "died")
         try:
             clean_session = super(MQTTClient, self).connect(clean_session = False)
         except OSError as e:
