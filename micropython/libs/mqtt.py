@@ -42,8 +42,12 @@ class MQTTClient(umqtt.robust.MQTTClient):
 
 
 class Client(MQTTClient):
+    def _sub_cb(self, topic, msg):
+        print("[%s]: %s" % (topic, msg))
+
     def connect(self):
         self.set_last_will("/lwt/"+self.client_id, "died")
+        self.set_callback(self._sub_cb)
         try:
             clean_session = super(MQTTClient, self).connect(clean_session = False)
         except OSError as e:
@@ -54,6 +58,7 @@ class Client(MQTTClient):
             if clean_session:
                 print("New session")
                 #Put here subscribe routines
+                self.subscribe("/"+self.client_id)
 
     def servicepub(self, ip):
         uptime = time.time()

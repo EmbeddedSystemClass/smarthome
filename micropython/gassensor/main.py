@@ -27,6 +27,10 @@ def servicepub_cb(timer):
         client.servicepub(ip)
         sysled.Flick()
 
+def check_msg_cb(timer):
+    for client in clients:
+        client.check_msg()
+
 #Init blue LED
 sysled = led.SysLed()
 
@@ -55,5 +59,9 @@ for broker in config['mqtt']['brokers']:
     sysled.Flick()
 
 #Init service data publish timer
-t = machine.Timer(-1)
-t.init(period = int(MQTT_SYSPUB_PERIOD), mode = machine.Timer.PERIODIC, callback = servicepub_cb)
+tpub = machine.Timer(-1)
+tpub.init(period = int(MQTT_SYSPUB_PERIOD), mode = machine.Timer.PERIODIC, callback = servicepub_cb)
+
+#Init messages waiting timer
+twait = machine.Timer(-1)
+twait.init(period = int(500), mode = machine.Timer.PERIODIC, callback = check_msg_cb)
