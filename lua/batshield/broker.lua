@@ -31,7 +31,31 @@ end
 -- actions
 
 -- events
-m:lwt('/lwt', MQTT_CLIENTID .. " died !", 0, 0)
+--m:lwt('/lwt', MQTT_CLIENTID .. " died !", 0, 0)
+
+function publish()
+    if connected == true then
+        LedBlink(50)
+
+        --publish battery state
+        local str = string.format("%0.1f", bat.get_volt())
+        m:publish("/"..MQTT_CLIENTID.."/state/bat/volt", str, 0, 0, nil)
+        local str = string.format("%d%%", bat.get_level())
+        m:publish("/"..MQTT_CLIENTID.."/state/bat/level", str, 0, 0, nil)
+
+        --publish service data
+        if (service_cnt < SERVICE_PERIOD / PUBLISH_PERIOD) then
+            service_cnt = service_cnt + 1
+        else
+            service_cnt = 0
+            time = tmr.time()
+            local str = string.format("%d", time)
+            --print("Uptime: "..str)
+            m:publish("/"..MQTT_CLIENTID.."/state/uptime", str, 0, 1, nil)
+            --m:publish("/"..MQTT_CLIENTID.."/state/ip", wifi.sta.getip(), 0, 1, nil)
+        end
+    end
+end
 
 m:on('connect', function(m)
 	print('MQTT : ' .. MQTT_CLIENTID .. " connected to : " .. MQTT_HOST .. " on port : " .. MQTT_PORT)
@@ -42,32 +66,12 @@ m:on('connect', function(m)
     connected = true
     LedFlickerStop()
 
-    --Service messages publish
-    tmr.alarm(PUBLISH_ALARM_ID, PUBLISH_PERIOD, 1, function ()
-        if connected == true then
-            LedBlink(50)
+    --Send all data
+    publish()
 
-            --publish battery state
-            local str = string.format("%0.1f", bat.get_volt())
-            m:publish("/"..MQTT_CLIENTID.."/state/bat/volt", str, 0, 0, nil)
-            local str = string.format("%d%%", bat.get_level())
-            m:publish("/"..MQTT_CLIENTID.."/state/bat/level", str, 0, 0, nil)
-
-            --publish service data
-            if (service_cnt < SERVICE_PERIOD / PUBLISH_PERIOD) then
-                service_cnt = service_cnt + 1
-            else
-                service_cnt = 0
-                time = tmr.time()
-                dd = time / (3600 * 24) 
-                hh = (time / 3600) % 24
-                mm = (time / 60) % 60
-                local str = string.format("%dd %dh %dm", dd, hh, mm)
-                --print("Uptime: "..str)
-                m:publish("/"..MQTT_CLIENTID.."/state/uptime", str, 0, 1, nil)
-                m:publish("/"..MQTT_CLIENTID.."/state/ip", wifi.sta.getip(), 0, 1, nil)
-            end
-        end
+    --Delayed deepsleep to be able to send publish messages
+    tmr.alarm(PUBLISH_ALARM_ID, 500, 1, function ()
+        node.dsleep(60 * 60 * 1000 * 1000)
     end)
 end)
 
