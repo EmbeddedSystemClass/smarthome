@@ -30,6 +30,8 @@ function tablelen(table)
     return n
 end
 
+load_lib("gpio")
+
 -- init all globals
 if not load_lib("config") then
     load_lib("default_config")
