@@ -16,6 +16,7 @@ sitemap belmont label="Home" {
 		Text label="Кухня" icon="sewerage" {
 			Frame label="Кухня" {
 				Switch item=Kitchentable icon="light"
+				Switch item=NightLight icon="light"
 			}
 		}
 		Text label="Коридор" icon="corridor" {
@@ -25,7 +26,6 @@ sitemap belmont label="Home" {
 		} 
 		Text label="Комната" icon="sofa" {
 			Frame label="Комната" {
-				Switch item=Sock1 icon="light"
 				Switch item=Sock2 icon="light"
 				Text item=TemperRoom label="Температура"
 			}
@@ -37,7 +37,7 @@ sitemap belmont label="Home" {
 				Text item=HumidityTerrace label="Влажность"
 			}
 		}
-		Text label="Полив" icon="grass" {
+		Text label="Полив" icon="lawnmower" {
 			Frame label="Полив" {
 				Switch item=Water mappings=[0="OFF", 1="Г1", 2="Г2", 3="Г3", 4="Г4", 5="Г5"]
 				Switch item=Plants icon="water"
@@ -61,7 +61,7 @@ sitemap belmont label="Home" {
 				Chart item=gGraphHumi period=h refresh=10000 visibility=[chart_period==4]
 			}
 		}
-		Text label="Общее" icon="house" {
+		Text label="Общее" icon="settings" {
 			Frame label="Общее" {
 				Text item=Pasha
 				Text item=Alina
