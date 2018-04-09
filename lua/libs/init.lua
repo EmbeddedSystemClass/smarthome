@@ -85,7 +85,7 @@ function wifi_watch()
         if TELNET_MODULE == 1 then
             load_lib("telnet")
         end
-        load_lib("broker")
+        load_lib("start")
     elseif status == wifi.STA_GOTIP and wifiReady == 1 then
         if firstPass == 0 then
             load_lib("http")

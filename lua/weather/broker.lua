@@ -15,7 +15,7 @@ end
 
 
 -- events
-m:lwt('/lwt', MQTT_CLIENTID .. " died !", 0, 0)
+m:lwt('/lwt/' .. MQTT_CLIENTID, "died", 0, 0)
 
 m:on('connect', function(m)
 	print('MQTT : ' .. MQTT_CLIENTID .. " connected to : " .. MQTT_HOST .. " on port : " .. MQTT_PORT)
