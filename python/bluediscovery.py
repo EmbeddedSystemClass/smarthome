@@ -3,7 +3,7 @@
 import sys, bluetooth, time, os
 import paho.mqtt.client as mqtt
 
-MQTT_SERVER = "192.168.1.206"
+MQTT_SERVER = "localhost"
 MQTT_PORT = 1883
 MQTT_CLIENT_ID = "bluediscover"
 

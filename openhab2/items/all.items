@@ -15,24 +15,26 @@ Group gTemperature (All)
 
 Number chart_period ""
 
-Switch Sock1 "Торшер" <light> (gHall,gLight) {mqtt=">[mysensors:/socket1/cmd/relay1:command:ON:1],>[mysensors:/socket1/cmd/relay1:command:OFF:0],<[mysensors:/socket1/stat/relay1/:state:default]"}
-Switch Sock2 "Спот" <light> (gHall,gLight) {mqtt=">[mysensors:/socket-153971/cmd/power:command:ON:1],>[mysensors:/socket-153971/cmd/power:command:OFF:0],<[mysensors:/socket-153971/state/power:state:default]"}
-Switch Kitchentable "Столешница" <light> (gHall,gLight) {mqtt=">[mysensors:/kitchendesk/cmd/power:command:ON:1],>[mysensors:/kitchendesk/cmd/power:command:OFF:0],<[mysensors:/kitchendesk/state/power:state:default]"}
+Switch Sock2 "Торшер" <light> (gHall,gLight) {mqtt=">[mysensors:/socket-153971/cmd/power:command:ON:1],>[mysensors:/socket-153971/cmd/power:command:OFF:0],<[mysensors:/socket-153971/state/power:state:default]", autoupdate="false"}
+Switch Kitchentable "Столешница" <light> (gKitchen,gLight) {mqtt=">[mysensors:/kitchendesk/cmd/power:command:ON:1],>[mysensors:/kitchendesk/cmd/power:command:OFF:0],<[mysensors:/kitchendesk/state/power:state:default]", autoupdate="false"}
+Switch NightLight "Лампа" <light> (gKitchen, gLight) {mqtt=">[mysensors:/socket-8780089/cmd/power:command:ON:1],>[mysensors:/socket-8780089/cmd/power:command:OFF:0],<[mysensors:/socket-8780089/state/power:state:default]", autoupdate="false"}
 
 Number Water "" <water> (gHall) {mqtt=">[mysensors:/water/cmd/stop:command:0:1],>[mysensors:/water/cmd/run:command:1:1],>[mysensors:/water/cmd/run:command:2:2],>[mysensors:/water/cmd/run:command:3:3],>[mysensors:/water/cmd/run:command:4:4],>[mysensors:/water/cmd/run:command:5:5],<[mysensors:/water/state/status:state:default]"}
 Switch Plants "Помпа" <water> (gHall) {mqtt=">[mysensors:/plantfactory/cmd/filltank:command:ON:1],>[mysensors:/plantfactory/cmd/stop:command:OFF:0],<[mysensors:/plantfactory/state/pump:state:default]"}
 
-String Uptime "Uptime [%s]" <clock> (gHall) 	{mqtt="<[mysensors:/weather/stat/uptime:state:default]"}
+String Uptime "Uptime [%s]" <clock> 	{mqtt="<[mysensors:/weather/stat/uptime:state:default]"}
 
 Number Pir "Движение [MAP(pir.map):%s]" <motion> (gComm,gCorridor)      {mqtt="<[mysensors:/pir/stat/motion:state:default]"}
 
-Number MiWF "" <boy_1> (gHall, gComm)      {mqtt="<[mysensors:/presence/mi:state:default]"}
-Number MiBT "" <boy_1> (gHall, gComm)      {mqtt="<[mysensors:/presence/mibt:state:default]"}
+Number MiWF "" {mqtt="<[mysensors:/presence/mi:state:default]"}
+Number MiBT "" {mqtt="<[mysensors:/presence/mibt:state:default]"}
+
+Number Mi5CWF "" {mqtt="<[mysensors:/presence/mi5c:state:default]"}
+Number Mi5CBT "" {mqtt="<[mysensors:/presence/mi5cbt:state:default]"}
+
+
 Number Pasha "Паша [MAP(athome.map):%s]" <boy_1> (gHall, gComm)
-
-Number Alina "Алина [MAP(athome.map):%s]" <girl_3> (gHall, gComm)      {mqtt="<[mysensors:/presence/iphone:state:default]"}
-
-//Dimmer Dim "Blue Led [%d %%]" () {mqtt=">[mysensors:/weather/cmd/dim:command:*:default]"}
+Number Alina "Алина [MAP(athome.map):%s]" <girl_3> (gHall, gComm)
 
 /*
 Number TemperRoom "Комната [%.1f °C]"    <temperature>    (gHall,gHallValues,gTemperature)      {mqtt="<[mysensors:/weather/state/temp/16031B:state:default]"}

@@ -1,75 +1,86 @@
 sitemap belmont label="Home" {
-Frame {
-	Group item=gHall label="Комната"
-	Group item=gKitchen label="Кухня"
-	Group item=gBedroom label="Спальня"
-	Group item=gCorridor label="Коридор"
-	Group item=gLight label="Свет" icon="light"
-	Group item=gTemperature label="Температура" icon="temperature"
-	Text label="Вода" icon="water" {
-		Switch item=Valves mappings=[0="Закрыть", 1="Открыть"]
-		Text item=ValveState
-		Text item=Flood
-	}
-}
-
-Frame {	
-	Text label="Кухня" icon="sewerage" {
-		Frame label="Кухня" {
-			Switch item=Kitchentable icon="light"
-		}
-	}
-	Text label="Коридор" icon="corridor" {
-		Frame label="Коридор" {
-			Text item=Pir
-		}
-	} 
-	Text label="Комната" icon="sofa" {
-		Frame label="Комната" {
-			Switch item=Sock1 icon="light"
-			Switch item=Sock2 icon="light"
-			Text item=TemperRoom label="Температура"
-		}
-	}
-	Text label="Балкон" icon="terrace" {
-		Frame label="Балкон" {
-			Text item=TemperTerrace label="Внутри"
-			Text item=TemperOutside label="За окном"
-			Text item=HumidityTerrace label="Влажность"
-		}
-	}
-	Text label="Полив" icon="grass" {
-		Frame label="Полив" {
-			Switch item=Water mappings=[0="OFF", 1="Г1", 2="Г2", 3="Г3", 4="Г4", 5="Г5"]
-			Switch item=Plants icon="water"
-		}
-	} 
-	Text label="Графики" icon="line" {
-		Frame {
-			
-			Switch item=chart_period icon=calendar mappings=[0="День", 1="Неделя", 2="Месяц", 3="Год", 4="Час"]	
-			
-			Chart item=gGraphTemper period=d refresh=10000 visibility=[chart_period==0, chart_period==Undefined]
-			Chart item=gGraphTemper period=W refresh=10000 visibility=[chart_period==1]
-			Chart item=gGraphTemper period=M refresh=10000 visibility=[chart_period==2]
-	 		Chart item=gGraphTemper period=Y refresh=10000 visibility=[chart_period==3]
-			Chart item=gGraphTemper period=h refresh=10000 visibility=[chart_period==4]
-			
-			Chart item=gGraphHumi period=d refresh=10000 visibility=[chart_period==0, chart_period==Undefined]
-			Chart item=gGraphHumi period=W refresh=10000 visibility=[chart_period==1]
-			Chart item=gGraphHumi period=M refresh=10000 visibility=[chart_period==2]
-	 		Chart item=gGraphHumi period=Y refresh=10000 visibility=[chart_period==3]
-			Chart item=gGraphHumi period=h refresh=10000 visibility=[chart_period==4]
-		}
-	}
-	Text label="Общее" icon="house" {
-		Frame label="Общее" {
-			Text item=Pasha
-			Text item=Alina
-			Text item=Pir mappings=["1"="Да", "0"="Нет", "Undefined"="n/a"]
+	Frame {
+		Group item=gHall label="Комната"
+		Group item=gKitchen label="Кухня"
+		Group item=gCorridor label="Коридор"
+		Group item=gLight label="Свет" icon="light"
+		Group item=gTemperature label="Температура" icon="temperature"
+		Text label="Вода" icon="water" {
+			Switch item=Valves mappings=[0="Закрыть", 1="Открыть"]
+			Text item=ValveState
+			Text item=Flood
 		}
 	}
 
+	Frame {	
+		Text label="Кухня" icon="sewerage" {
+			Frame label="Кухня" {
+				Switch item=Kitchentable icon="light"
+				Switch item=NightLight icon="light"
+			}
+		}
+		Text label="Коридор" icon="corridor" {
+			Frame label="Коридор" {
+				Text item=Pir
+			}
+		} 
+		Text label="Комната" icon="sofa" {
+			Frame label="Комната" {
+				Switch item=Sock2 icon="light"
+				Text item=TemperRoom label="Температура"
+			}
+		}
+		Text label="Балкон" icon="terrace" {
+			Frame label="Балкон" {
+				Text item=TemperTerrace label="Внутри"
+				Text item=TemperOutside label="За окном"
+				Text item=HumidityTerrace label="Влажность"
+			}
+		}
+		Text label="Полив" icon="lawnmower" {
+			Frame label="Полив" {
+				Switch item=Water mappings=[0="OFF", 1="Г1", 2="Г2", 3="Г3", 4="Г4", 5="Г5"]
+				Switch item=Plants icon="water"
+			}
+		} 
+		Text label="Графики" icon="line" {
+			Frame {
+				
+				Switch item=chart_period icon=calendar mappings=[0="День", 1="Неделя", 2="Месяц", 3="Год", 4="Час"]	
+				
+				Chart item=gGraphTemper period=d refresh=10000 visibility=[chart_period==0, chart_period==Undefined]
+				Chart item=gGraphTemper period=W refresh=10000 visibility=[chart_period==1]
+				Chart item=gGraphTemper period=M refresh=10000 visibility=[chart_period==2]
+				Chart item=gGraphTemper period=Y refresh=10000 visibility=[chart_period==3]
+				Chart item=gGraphTemper period=h refresh=10000 visibility=[chart_period==4]
+				
+				Chart item=gGraphHumi period=d refresh=10000 visibility=[chart_period==0, chart_period==Undefined]
+				Chart item=gGraphHumi period=W refresh=10000 visibility=[chart_period==1]
+				Chart item=gGraphHumi period=M refresh=10000 visibility=[chart_period==2]
+				Chart item=gGraphHumi period=Y refresh=10000 visibility=[chart_period==3]
+				Chart item=gGraphHumi period=h refresh=10000 visibility=[chart_period==4]
+			}
+		}
+		Text label="Общее" icon="settings" {
+			Frame label="Общее" {
+				Text item=Pasha
+				Text item=Alina
+				Text item=Pir
+			}
+		}
+		Group item=gVac {
+			Switch item=actionControl mappings=[vacuum="Vacuum", pause="Pause",spot="Spot", dock="Dock"]
+			Switch item=actionFan mappings=[38="Silent", 60="Normal", 77="Power",90="Full", -1="Custom"]
+			Default item=statusBat 
+			Default item=statusArea 
+			Default item=statusTime 
+			Group  item=gVacStat
+			Group  item=gVacCons
+			Group  item=gVacDND
+			Group  item=gVacHist
+			Group  item=gVacNetwork
+		}
+	}
 }
 
 

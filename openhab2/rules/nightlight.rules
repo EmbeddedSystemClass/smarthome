@@ -1,0 +1,13 @@
+rule "Night Light Off"
+	when
+		Time cron "0 0 2 ? * *"
+	then
+        NightLight.sendCommand(OFF)
+end
+
+rule "Night Light On"
+	when
+		Time cron "0 0 20 ? * *"
+	then
+        NightLight.sendCommand(ON)
+end
