@@ -1,18 +1,18 @@
 local servo = {}
 
 local pins = {5, 6, 7, 8}
-local clock = 100
+local clock = 60
 
 local min=65;
-local max=240;
+local max=150;
 
 print("Init servos: ")
-for i = 1, table.getn(pins) do
+for i, p in pairs(pins) do
     print("pin: " .. pins[i]) 
-    gpio.mode(pins[i], gpio.OUTPUT)
-    gpio.write(pins[i], gpio.LOW)
-    pwm.setup(pins[i],clock,min);
-    pwm.start(pins[i])
+    gpio.mode(p, gpio.OUTPUT)
+    gpio.write(p, gpio.LOW)
+    pwm.setup(p,clock,min);
+    pwm.start(p)
 end
 
 function servo.set(pin,pos)
