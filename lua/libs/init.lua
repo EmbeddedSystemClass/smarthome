@@ -56,7 +56,7 @@ function connectWiFi(ssid_list)
         wifi.sta.config(ssid, pass)
         tmr.alarm(WIFI_ALARM_ID, 2000, tmr.ALARM_AUTO, wifi_watch)
     else
-        print("SSID not found")
+        print("No SSIDs found")
         LedFlicker(50, 100, 5)
     end
 end
@@ -82,15 +82,19 @@ function wifi_watch()
         wifiReady = 1
         print("WiFi: connected with " .. wifi.sta.getip())
         LedBlink(400)
-        if TELNET_MODULE == 1 then
-            load_lib("telnet")
-        end
-        load_lib("start")
-    elseif status == wifi.STA_GOTIP and wifiReady == 1 then
+        --run modules on first start only
         if firstPass == 0 then
-            load_lib("http")
+            if TELNET_MODULE == 1 then
+                load_lib("telnet")
+            end
+            if HTTP_MODULE == 1 then
+                load_lib("http")
+            end
+            load_lib("start")
             firstPass = 1
         end
+    elseif status == wifi.STA_GOTIP and wifiReady == 1 then
+        --pass
     else
         wifiReady = 0
         LedFlicker(50, 500, 10)
