@@ -1,148 +1,66 @@
-local servo = require "servo"
-local motor = require "motor"
+local chassis = require "chassis"
 
 -- Holds dispatching keys to different topics. Serves as a makeshift callback
 -- function dispatcher based on topic and message content
 m_dis = {}
 
-MQTT_CLIENTID = "motor"
-MQTT_HOST = "192.168.1.206"
-MQTT_PORT = 1883
-
--- Standard counter variable. Used for modulo arithmatic
-local count = 0
-local time = 0
-
-
-function run_forward(m, pl)
-    -- Confirm that an animation message was received on the /mcu/cmd topic
-    m:publish("/motor/stat/run", "forward " .. pl, 0, 0,
-            function(m) print("run: forward" .. pl) end)
-    
-    motor.set("A", "F", pl)
-    motor.set("B", "F", pl)
-end
-
-
-function run_backward(m, pl)
-    -- Confirm that an animation message was received on the /mcu/cmd topic
-    m:publish("/motor/stat/run", "backward " .. pl, 0, 0,
-            function(m) print("run: backward" .. pl) end)
-    
-    motor.set("A", "R", pl)
-    motor.set("B", "R", pl)
-end
-
-
-function turn_left(m, pl)
-    -- Confirm that an animation message was received on the /mcu/cmd topic
-    m:publish("/motor/stat/run", "left " .. pl, 0, 0,
-            function(m) print("run: left" .. pl) end)
-    
-    motor.set("A", "F", pl)
-    motor.set("B", "R", pl)
-end
-
-
-function turn_right(m, pl)
-    -- Confirm that an animation message was received on the /mcu/cmd topic
-    m:publish("/motor/stat/run", "right " .. pl, 0, 0,
-            function(m) print("run: right" .. pl) end)
-    
-    motor.set("A", "R", pl)
-    motor.set("B", "F", pl)
-end
-
-
-function stop(m, pl)
-    -- Confirm that an animation message was received on the /mcu/cmd topic
-    m:publish("/motor/stat/run", "stop", 0, 0,
-            function(m) print("stop") end)
-    
-    motor.set("A", "R", 0)
-    motor.set("B", "R", 0)
-end
-
-
-function light(m, pl)
-    if pl == "0" then
-        -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/motor/stat/light", "OFF", 0, 0,
-            function(m) print("Light OFF") end)
-        --gpio.write(light_pin, gpio.HIGH)    
-    end
-    if pl == "1" then
-        -- Confirm LED being turned off to serial terminal and MQTT broker
-        m:publish("/motor/stat/light", "ON", 0, 0,
-            function(m) print("Light ON") end)
-        --gpio.write(light_pin, gpio.LOW)
-    end
-end
-
-
-function move_servo(m, pl)
-    -- Confirm that an animation message was received on the /mcu/cmd topic
-    m:publish("/motor/stat/servo", "servo: " .. pl, 0, 0,
-            function(m) print("servo: " .. pl) end)
-
-    local args = {}
-    for arg in string.gmatch(pl, "([^,]+)") do
-        table.insert(args, arg)
-    end
-    servo.set(tonumber(args[1]),tonumber(args[2]))
-end
-
-    
 -- As part of the dispatcher algorithm, this assigns a topic name as a key or
 -- index to a particular function name
-m_dis["/motor/cmd/forward"] = run_forward
-m_dis["/motor/cmd/backward"] = run_backward
-m_dis["/motor/cmd/left"] = turn_left
-m_dis["/motor/cmd/right"] = turn_right
-m_dis["/motor/cmd/stop"] = stop
-m_dis["/motor/cmd/light"] = light
-m_dis["/motor/cmd/servo"] = move_servo
+m_dis["/motor/cmd/forward"] = chassis.run_forward
+m_dis["/motor/cmd/backward"] = chassis.run_backward
+m_dis["/motor/cmd/left"] = chassis.turn_left
+m_dis["/motor/cmd/right"] = chassis.turn_right
+m_dis["/motor/cmd/stop"] = chassis.stop
+m_dis["/motor/cmd/light"] = chassis.light
+m_dis["/motor/cmd/servo"] = chassis.move_servo
 
 
 -- initialize mqtt client with keepalive timer of 60sec
-m = mqtt.Client(MQTT_CLIENTID, 60, "", "") -- Living dangerously. No password!
-
+m = mqtt.Client(MQTT_CLIENTID, 10, "", "") -- Living dangerously. No password!
 
 -- Set up Last Will and Testament (optional)
 -- Broker will publish a message with qos = 0, retain = 0, data = "offline"
 -- to topic "/lwt" if client don't send keepalive packet
 m:lwt("/lwt", "Oh noes! Plz! I don't wanna die!", 0, 0)
 
+-- Publish service data: uptime and IP
+function service_pub()
+    time = tmr.time()
+    dd = time / (3600 * 24)
+    hh = (time / 3600) % 24
+    mm = (time / 60) % 60
+    local str = string.format("%dd %dh %dm", dd, hh, mm)
+    --print(str)
+    m:publish("/"..MQTT_CLIENTID.."/stat/uptime", str, 0, 1, nil)
+    ip = wifi.sta.getip()
+    if ip == nil then
+        ip = "unknown"
+    end
+    m:publish("/"..MQTT_CLIENTID.."/stat/ip", ip, 0, 1, nil)
+end
 
 -- When client connects, print status message and subscribe to cmd topic
-m:on("connect", function(m) 
+function handle_mqtt_connect(m)
     -- Serial status message
-    print ("\n\n", MQTT_CLIENTID, " connected to MQTT host ", MQTT_HOST,
+    print("\n\n", MQTT_CLIENTID, " connected to MQTT host ", MQTT_HOST,
         " on port ", MQTT_PORT, "\n\n")
 
     -- Subscribe to the topic where the ESP8266 will get commands from
     m:subscribe("/motor/cmd/#", 0,
         function(m) print("Subscribed to CMD Topic") end)
 
-    tmr.alarm(2, 509, 1, function ()
-        time = tmr.time()
-        dd = time / (3600 * 24) 
-        hh = (time / 3600) % 24
-        mm = (time / 60) % 60
-        local str = string.format("%dd %dh %dm", dd, hh, mm)
-        print(str)
-        m:publish("/"..MQTT_CLIENTID.."/stat/uptime", str, 0, 0, nil)
-        m:publish("/"..MQTT_CLIENTID.."/stat/ip", wifi.sta.getip(), 0, 0, nil)
-    end)
-end)
-
+    -- Publish service data periodicaly
+    service_pub()
+    tmr.alarm(PUBLISH_ALARM_ID, 60000, 1, service_pub)
+end
 
 -- When client disconnects, print a message and list space left on stack
 m:on("offline", function(m)
     print ("\n\nDisconnected from broker")
     print("Heap: ", node.heap())
+    tmr.unregister(PUBLISH_ALARM_ID)
+    do_mqtt_connect()
 end)
-
 
 -- On a publish message receive event, run the message dispatcher and
 -- interpret the command
@@ -157,8 +75,17 @@ m:on("message", function(m,t,pl)
     end
 end)
 
-print("Connecting to: ", MQTT_HOST)
--- Connect to the broker
-print(m:connect(MQTT_HOST, MQTT_PORT, 0, 1))
---m:close()
+-- MQTT error handler
+function handle_mqtt_error(client, reason)
+    print("herror")
+    tmr.create():alarm(2 * 1000, tmr.ALARM_SINGLE, do_mqtt_connect)
+end
 
+-- MQTT connect handler
+function do_mqtt_connect()
+  print("Connecting to broker", MQTT_HOST, "...")
+  m:connect(MQTT_HOST, MQTT_PORT, 0, 0, handle_mqtt_connect, handle_mqtt_error)
+end
+
+-- Connect to the broker
+do_mqtt_connect()
