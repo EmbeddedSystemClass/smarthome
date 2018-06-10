@@ -1,1 +1,1 @@
-../socket/install.sh
+../tools/install.sh
