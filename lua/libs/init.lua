@@ -53,7 +53,11 @@ function connectWiFi(ssid_list)
     end
     if ssid ~= nil then
         print("Connecting to "..ssid)
-        wifi.sta.config(ssid, pass)
+        -- New wifi module API used since nodemcu fw pull request #1497
+        station_cfg={}
+        station_cfg.ssid = ssid
+        station_cfg.pwd = pass
+        wifi.sta.config(station_cfg)
         tmr.alarm(WIFI_ALARM_ID, 2000, tmr.ALARM_AUTO, wifi_watch)
     else
         print("No SSIDs found")
