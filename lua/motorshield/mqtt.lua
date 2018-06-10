@@ -77,7 +77,6 @@ end)
 
 -- MQTT error handler
 function handle_mqtt_error(client, reason)
-    print("herror")
     tmr.create():alarm(2 * 1000, tmr.ALARM_SINGLE, do_mqtt_connect)
 end
 
