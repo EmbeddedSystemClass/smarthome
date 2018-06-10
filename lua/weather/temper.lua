@@ -1,4 +1,4 @@
-t = require("ds18b20")
+t = require("ds18b20_lua")
 
 temperature = {}
 local REQUEST_PERIOD = 10000
