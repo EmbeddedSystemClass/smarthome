@@ -67,6 +67,41 @@ sitemap belmont label="Home" {
 				Text item=Alina
 				Text item=Pir
 			}
+			Frame {
+				Text item=MyDevice label="Device [%s]"
+				Text item=MyDeviceLastSeen label="Device Last Seen [ %tR, %1$tA, %1$td.%1$tm.%1$tY]"
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=MyDevice&theme=black&period=12h&h=100&w=400"
+			}
+		}
+		Text label="Debug" icon="zoom" {
+			Text label="Batshield" icon="battery" {
+				Text item=BatshieldVolt
+				Text item=BatshieldLevel
+				Text item=BatshieldRaw
+				Text item=BatshieldUpdated valuecolor=[BatshieldUpdated>300="red",>240="purple",>120="orange",>0="green"]
+
+				Switch item=bat_period icon=calendar mappings=[0="D", 1="3D", 2="W", 3="2W", 4="M"]				
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldVolt&theme=black&period=M&h=300&w=850" visibility=[bat_period==4, bat_period=="Uninitialized", bat_period=="Undefined"]
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldVolt&theme=black&period=2W&h=300&w=850" visibility=[bat_period==3]
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldVolt&theme=black&period=W&h=300&w=850" visibility=[bat_period==2]
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldVolt&theme=black&period=3D&h=300&w=850" visibility=[bat_period==1]
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldVolt&theme=black&period=D&h=300&w=850" visibility=[bat_period==0]
+				
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldLevel&theme=black&period=M&h=300&w=850" visibility=[bat_period==4, bat_period=="Uninitialized", bat_period=="Undefined"]
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldLevel&theme=black&period=2W&h=300&w=850" visibility=[bat_period==3]
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldLevel&theme=black&period=W&h=300&w=850" visibility=[bat_period==2]
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldLevel&theme=black&period=3D&h=300&w=850" visibility=[bat_period==1]
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldLevel&theme=black&period=D&h=300&w=850" visibility=[bat_period==0]				
+			}
+			Text label="Gas" icon="carbondioxide" {
+				Text item=GassensVolt
+				Switch item=gas_period icon=calendar mappings=[0="H", 1="4H", 2="8H", 3="12H", 4="D"]
+				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=GassensVolt&theme=black&period=D&h=300&w=850" visibility=[gas_period==4]
+				Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=GassensVolt&theme=black&period=12h&h=300&w=850" visibility=[gas_period==3]
+				Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=GassensVolt&theme=black&period=8h&h=300&w=850" visibility=[gas_period==2]
+				Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=GassensVolt&theme=black&period=4h&h=300&w=850" visibility=[gas_period==1]
+				Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=GassensVolt&theme=black&period=h&h=300&w=850" visibility=[gas_period==0, gas_period=="Uninitialized", gas_period=="Undefined"]
+			}
 		}
 		Group item=gVac {
 			Switch item=actionControl mappings=[vacuum="Vacuum", pause="Pause",spot="Spot", dock="Dock"]
