@@ -1,14 +1,15 @@
-// persistence strategies have a name and a definition and are referred to in the "Items" section
 Strategies {
-	// for rrd charts, we need a cron strategy
 	everyMinute : "0 * * * * ?"
 	everySecond : "* * * * * ?"
 }
 
 Items {
-	// let's only store temperature values in rrd
 	TemperRoom : strategy = everySecond, restoreOnStartup
 	TemperTerrace : strategy = everySecond, restoreOnStartup
 	TemperOutside : strategy = everySecond, restoreOnStartup
 	HumidityTerrace : strategy = everySecond, restoreOnStartup
+	BatshieldLevel : strategy = everySecond, restoreOnStartup
+	BatshieldVolt : strategy = everySecond, restoreOnStartup
+	GassensVolt : strategy = everySecond, restoreOnStartup
+	MyDevice : strategy = everySecond, everyChange, restoreOnStartup
 }
