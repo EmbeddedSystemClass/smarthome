@@ -8,3 +8,4 @@ output_elf
 !.cproject
 !.settings
 config.json
+workspace.code-workspace

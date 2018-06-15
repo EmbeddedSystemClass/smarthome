@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FW=./nodemcu-master-21-modules-2017-03-20-19-10-23-float.bin
+FW=./nodemcu-master-22-modules-2018-05-27-13-21-02-float.bin
 PORT=/dev/ttyUSB0 
 
 if [ -z $FW ]; then

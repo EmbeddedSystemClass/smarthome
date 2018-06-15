@@ -1,3 +1,3 @@
- dofile ("temper.lua")
- dofile ("dht11.lua")
- dofile ("broker.lua")
+load_lib("temper")
+load_lib("dht11")
+load_lib("mqtt")

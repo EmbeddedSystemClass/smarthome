@@ -6,8 +6,10 @@ import machine
 import ujson
 import ubinascii
 import network
+import mq135
 
 MQTT_SYSPUB_PERIOD = 1000 * 60 * 5
+MQTT_PUB_PERIOD = 1000 * 5
 
 clients = []
 
@@ -25,6 +27,14 @@ def servicepub_cb(timer):
     ip = wlan.getip()
     for client in clients:
         client.servicepub(ip)
+        sysled.Flick()
+
+#Callback to publish service data
+def pub_cb(timer):
+    ip = wlan.getip()
+    voltage = gas.get_volt()
+    for client in clients:
+        client.publish('/' + client.id + '/gas/voltage', str(voltage))
         sysled.Flick()
 
 def check_msg_cb(timer):
@@ -58,10 +68,18 @@ for broker in config['mqtt']['brokers']:
     clients.append(client)
     sysled.Flick()
 
+
+#Init gas sensor
+gas = mq135.Sensor()
+
 #Init service data publish timer
-tpub = machine.Timer(-1)
-tpub.init(period = int(MQTT_SYSPUB_PERIOD), mode = machine.Timer.PERIODIC, callback = servicepub_cb)
+tsys = machine.Timer(-1)
+tsys.init(period = int(MQTT_SYSPUB_PERIOD), mode = machine.Timer.PERIODIC, callback = servicepub_cb)
 
 #Init messages waiting timer
 twait = machine.Timer(-1)
 twait.init(period = int(500), mode = machine.Timer.PERIODIC, callback = check_msg_cb)
+
+#Init main data publish timer
+tpub = machine.Timer(-1)
+tpub.init(period = int(MQTT_PUB_PERIOD), mode = machine.Timer.PERIODIC, callback = pub_cb)
