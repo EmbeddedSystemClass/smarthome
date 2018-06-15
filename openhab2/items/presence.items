@@ -1,0 +1,3 @@
+Switch MyDevice <boy_1> { channel="network:pingdevice:devicename:online" }
+Number MyDeviceResponseTime <boy_1> { channel="network:pingdevice:devicename:latency" }
+DateTime MyDeviceLastSeen <boy_1> { channel="network:pingdevice:devicename:lastseen" }
