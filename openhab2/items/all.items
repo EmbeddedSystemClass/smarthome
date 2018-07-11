@@ -52,7 +52,7 @@ String LwtTerrace  	"" (gTerrace) 	{mqtt="<[mysensors:/lwt/terrace:state:default
 
 Number HumidityTerrace "Влажность [JS(humisensor.js):%s]" <humidity>    (gHallValues,gGraphHumi)      {mqtt="<[mysensors:/terrace/state/dht/humi:state:default]"}
 
-Number Valves "Краны" <faucet> (gWater) {mqtt=">[mysensors:/aquastor/cmd/valve:command:0:OFF],>[mysensors:/aquastor/cmd/valve:command:1:ON],<[aquastor:/plantfactory/state/valve:state:default]"}
+Number Valves "Краны" <faucet> (gWater) {mqtt=">[mysensors:/aquastor/cmd/valve:command:0:OFF],>[mysensors:/aquastor/cmd/valve:command:1:ON]"}
 String ValveState "Cостояние [MAP(valve.map):%s]" <faucet> (gWater) 	{mqtt="<[mysensors:/aquastor/state/valve:state:default]"}
 String Flood "Протечка [MAP(flood.map):%s]" <rain> (gWater) 	{mqtt="<[mysensors:/aquastor/state/alarm:state:default]"}
 
