@@ -12,4 +12,6 @@ Items {
 	BatshieldVolt : strategy = everySecond, restoreOnStartup
 	GassensVolt : strategy = everySecond, restoreOnStartup
 	MyDevice : strategy = everySecond, everyChange, restoreOnStartup
+	gParams* : strategy = everyChange, restoreOnStartup
+	gStates* : strategy = everyChange, restoreOnStartup
 }
