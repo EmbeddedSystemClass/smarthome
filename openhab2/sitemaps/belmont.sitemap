@@ -18,9 +18,9 @@ sitemap belmont label="Home" {
 			Image refresh=10000 url="http://localhost:8080/rrdchart.png?groups=gGraphHumi&theme=black&period=d&h=300&w=850"
 		}
 		Text label="Вода" icon="water" {
-			Switch item=Valves mappings=[0="Закрыть", 1="Открыть"]
+			Switch item=Valves mappings=[0="Закрыть", 1="Открыть", 2="Авто"]
 			Text item=ValveState
-			Text item=Flood
+			//Text item=Flood
 		}
 	}
 
@@ -50,11 +50,40 @@ sitemap belmont label="Home" {
 			}
 		}
 		Text label="Полив" icon="lawnmower" {
-			Frame label="Полив" {
+			Frame  {
 				Switch item=Water mappings=[0="OFF", 1="Г1", 2="Г2", 3="Г3", 4="Г4", 5="Г5"]
-				Switch item=Plants icon="water"
+				Text item=LastWatered
+				Switch item=Pump_1 icon="water"
+				Text item=Timestamp_Pump_1
+				Switch item=Pump_2 icon="water"
+				Text item=Timestamp_Pump_2
+				Switch item=Pump_3 icon="water"
+				Text item=Timestamp_Pump_3
 			}
-		} 
+			Frame label="Параметры" {
+				Setpoint item=Duration_1 label="Продолжительность Г1 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Text item=Timestamp_1
+				Setpoint item=Duration_2 label="Продолжительность Г2 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Text item=Timestamp_2
+				Setpoint item=Duration_3 label="Продолжительность Г3 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Text item=Timestamp_3
+				Setpoint item=Duration_4 label="Продолжительность Г4 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Text item=Timestamp_4
+
+				Setpoint item=Duration_Pump_1 label="Продолжительность П1 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Text item=Timestamp_Pump_1
+
+				Setpoint item=Duration_Pump_2 label="Продолжительность П2 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Text item=Timestamp_Pump_2
+
+				Setpoint item=Duration_Pump_3 label="Продолжительность П3 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Text item=Timestamp_Pump_3
+
+				Setpoint item=WateringHour label="Время запуска (ЧЧ) [%d]" minValue=0 maxValue=23 step=1
+				Setpoint item=WateringMinute label="Время запуска (ММ) [%d]" minValue=0 maxValue=50 step=10
+				Text item=WaterRemainTime
+			}
+		}
 		Text label="Графики" icon="line" {
 			Frame {
 				Switch item=chart_period icon=calendar mappings=[0="H", 1="D", 2="W", 3="M", 4="Y"]	
