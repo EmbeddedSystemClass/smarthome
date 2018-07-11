@@ -5,8 +5,8 @@ rule "Nobody at home"
 	then
 		if (Pasha.state == 0 && Alina.state == 0) {
         	gLight.sendCommand(OFF)
-        	if (Valves.state != 0) {
-        		Valves.sendCommand(0)	
+        	if (Valves.state == 2) {
+        		Valves.sendCommand(0)
         	}
         }
 end
@@ -16,7 +16,14 @@ rule "Welcome home"
 		Item Pasha changed to 1 or 
 		Item Alina changed to 1
 	then
-		if (Valves.state != 1 ) {
+		if (Valves.state == 2  ) {
         	Valves.sendCommand(1)
         }
+end
+
+rule "Initial state"
+	when
+		System started
+	then
+		Valves.postUpdate(2)
 end
