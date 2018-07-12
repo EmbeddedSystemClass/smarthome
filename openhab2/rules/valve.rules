@@ -1,3 +1,10 @@
+rule "Initial state"
+	when
+		System started
+	then
+		Valves.postUpdate(2)
+end
+
 rule "Nobody at home"
 	when
 		Item Pasha changed to 0 or
@@ -21,9 +28,3 @@ rule "Welcome home"
         }
 end
 
-rule "Initial state"
-	when
-		System started
-	then
-		Valves.postUpdate(2)
-end
