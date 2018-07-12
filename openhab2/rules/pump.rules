@@ -1,3 +1,32 @@
+rule "Pump all"
+	when
+		Time cron "0 * * ? * *"
+	then
+		var Number hour = (WateringHour.state as DecimalType).intValue
+		var Number minute = (WateringMinute.state as DecimalType).intValue
+
+		if (now.getHourOfDay == hour && now.getMinuteOfHour == minute) {
+			logInfo( "INFO", "It's time to pump" )
+		
+			//pump 1
+			Pump_1.sendCommand(ON)
+			Thread::sleep(((Duration_Pump_1.state as DecimalType).floatValue * 1000).intValue)
+            Pump_1.sendCommand(OFF)
+
+			//pump 2
+			Pump_2.sendCommand(ON)
+			Thread::sleep(((Duration_Pump_2.state as DecimalType).floatValue * 1000).intValue)
+            Pump_2.sendCommand(OFF)
+			
+			//pump 3
+			Pump_3.sendCommand(ON)
+			Thread::sleep(((Duration_Pump_3.state as DecimalType).floatValue * 1000).intValue)
+            Pump_3.sendCommand(OFF)
+            logInfo( "INFO", "Pumping finished" )
+		}
+end
+
+
 rule "Pump_1 timestamp"
 when
     Item Pump_1 changed to ON
@@ -9,7 +38,7 @@ rule "Pump_1 off"
 when
     Item Pump_1 changed to ON
 then
-	Thread::sleep(((Duration_Pump_1.state as DecimalType).floatValue * 1000 * 60).intValue)
+	Thread::sleep(((Duration_Pump_1.state as DecimalType).floatValue * 1000).intValue + 1000)
 	Pump_1.sendCommand(OFF)
 end
 
@@ -25,7 +54,7 @@ rule "Pump_2 off"
 when
     Item Pump_2 changed to ON
 then
-	Thread::sleep(((Duration_Pump_2.state as DecimalType).floatValue * 1000 * 60).intValue)
+	Thread::sleep(((Duration_Pump_2.state as DecimalType).floatValue * 1000).intValue + 1000)
 	Pump_2.sendCommand(OFF)
 end
 
@@ -41,7 +70,6 @@ rule "Pump_3 off"
 when
     Item Pump_3 changed to ON
 then
-    var Number value = (Duration_Pump_3.state as DecimalType).floatValue * 1000 * 60 
-	Thread::sleep(((Duration_Pump_3.state as DecimalType).floatValue * 1000 * 60).intValue)
+	Thread::sleep(((Duration_Pump_3.state as DecimalType).floatValue * 1000).intValue + 1000)
 	Pump_3.sendCommand(OFF)
 end
