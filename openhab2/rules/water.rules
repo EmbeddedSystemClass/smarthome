@@ -8,6 +8,13 @@ rule "Initial state"
 		System started
 	then
 		Water.postUpdate(0)
+		// Duration_1.postUpdate(10)
+		// Duration_2.postUpdate(10)
+		// Duration_3.postUpdate(10)
+		// Duration_4.postUpdate(10)
+		// Duration_Pump_1.postUpdate(10)
+		// Duration_Pump_2.postUpdate(10)
+		// Duration_Pump_3.postUpdate(10)
 end
 
 rule "Water all"
@@ -22,21 +29,24 @@ rule "Water all"
 		
 			//group 1
 			Water.sendCommand(1)
-			Thread::sleep(((Duration_1.state as DecimalType).floatValue * 1000 * 60).intValue)
+			Thread::sleep(((Duration_1.state as DecimalType).floatValue * 1000).intValue)
 
 			//group 2
 			Water.sendCommand(2)
-			Thread::sleep(((Duration_2.state as DecimalType).floatValue * 1000 * 60).intValue)
+			Thread::sleep(((Duration_2.state as DecimalType).floatValue * 1000).intValue)
 			
 			//group 3
 			Water.sendCommand(3)
-			Thread::sleep(((Duration_3.state as DecimalType).floatValue * 1000 * 60).intValue)
+			Thread::sleep(((Duration_3.state as DecimalType).floatValue * 1000).intValue)
 
 			//group 4
 			Water.sendCommand(4)
-			Thread::sleep(((Duration_4.state as DecimalType).floatValue * 1000 * 60).intValue)
+			Thread::sleep(((Duration_4.state as DecimalType).floatValue * 1000).intValue)
 
 			Water.sendCommand(0)
+
+			LastWatered.postUpdate(new DateTimeType())
+
 			logInfo( "INFO", "Watering finished" )
 		}
 end
@@ -45,32 +55,40 @@ rule " Water group_1"
 when
         Item Water changed to 1
 then
-	Thread::sleep(((Duration_1.state as DecimalType).floatValue * 1000 * 60).intValue)
-	Water.sendCommand(0)
+	Thread::sleep(((Duration_1.state as DecimalType).floatValue * 1000).intValue + 1000)
+	if (Water.state == 1) {
+		Water.sendCommand(0)
+        }
 end
 
 rule " Water group_2"
 when
         Item Water changed to 2
 then
-	Thread::sleep(((Duration_2.state as DecimalType).floatValue * 1000 * 60).intValue)
-	Water.sendCommand(0)
+	Thread::sleep(((Duration_2.state as DecimalType).floatValue * 1000).intValue + 1000)
+	if (Water.state == 2) {
+		Water.sendCommand(0)
+        }
 end
 
 rule "Water group_3"
 when
         Item Water changed to 3
 then
-	Thread::sleep(((Duration_3.state as DecimalType).floatValue * 1000 * 60).intValue)
-	Water.sendCommand(0)
+	Thread::sleep(((Duration_3.state as DecimalType).floatValue * 1000).intValue + 1000)
+	if (Water.state == 3) {
+		Water.sendCommand(0)
+        }
 end
 
 rule "Water group_4"
 when
         Item Water changed to 4
 then
-	Thread::sleep(((Duration_4.state as DecimalType).floatValue * 1000 * 60).intValue)
-	Water.sendCommand(0)
+	Thread::sleep(((Duration_4.state as DecimalType).floatValue * 1000).intValue + 1000)
+	if (Water.state == 4) {
+		Water.sendCommand(0)
+        }
 end
 
 
@@ -104,12 +122,12 @@ then
 end
 
 
-rule "Any group timestamp"
-when
-        Item Water changed to 1 or
-	Item Water changed to 2 or
-	Item Water changed to 3 or
-	Item Water changed to 4
-then
-        LastWatered.postUpdate(new DateTimeType())
-end
+// rule "Any group timestamp"
+// when
+//         Item Water changed to 1 or
+// 	Item Water changed to 2 or
+// 	Item Water changed to 3 or
+// 	Item Water changed to 4
+// then
+//         LastWatered.postUpdate(new DateTimeType())
+// end

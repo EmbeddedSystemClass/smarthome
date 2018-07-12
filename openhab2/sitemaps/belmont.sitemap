@@ -61,22 +61,22 @@ sitemap belmont label="Home" {
 				Text item=Timestamp_Pump_3
 			}
 			Frame label="Параметры" {
-				Setpoint item=Duration_1 label="Продолжительность Г1 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Setpoint item=Duration_1 label="Г1 продолж. полива [%d cек.]" minValue=10 maxValue=120 step=10
 				Text item=Timestamp_1
-				Setpoint item=Duration_2 label="Продолжительность Г2 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Setpoint item=Duration_2 label="Г2 продолж. полива [%d cек.]" minValue=10 maxValue=120 step=10
 				Text item=Timestamp_2
-				Setpoint item=Duration_3 label="Продолжительность Г3 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Setpoint item=Duration_3 label="Г3 продолж. полива [%d cек.]" minValue=10 maxValue=120 step=10
 				Text item=Timestamp_3
-				Setpoint item=Duration_4 label="Продолжительность Г4 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Setpoint item=Duration_4 label="Г4 продолж. полива [%d cек.]" minValue=10 maxValue=120 step=10
 				Text item=Timestamp_4
 
-				Setpoint item=Duration_Pump_1 label="Продолжительность П1 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Setpoint item=Duration_Pump_1 label="П1 продолж. полива [%d cек.]" minValue=10 maxValue=120 step=10
 				Text item=Timestamp_Pump_1
 
-				Setpoint item=Duration_Pump_2 label="Продолжительность П2 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Setpoint item=Duration_Pump_2 label="П2 продолж. полива [%d cек.]" minValue=10 maxValue=120 step=10
 				Text item=Timestamp_Pump_2
 
-				Setpoint item=Duration_Pump_3 label="Продолжительность П3 [%.1f мин.]" minValue=0.5 maxValue=30 step=0.5
+				Setpoint item=Duration_Pump_3 label="П3 продолж. полива [%d cек.]" minValue=10 maxValue=120 step=10
 				Text item=Timestamp_Pump_3
 
 				Setpoint item=WateringHour label="Время запуска (ЧЧ) [%d]" minValue=0 maxValue=23 step=1
