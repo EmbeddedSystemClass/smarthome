@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FW=nodemcu-master-24-modules-2018-09-20-09-16-58-float.bin
+FW=nodemcu-master-24-modules-2018-09-20-13-22-49-float.bin
 DEFPORT=/dev/ttyUSB0
 BAUD=250000
 ESPTOOL=esptool.py
