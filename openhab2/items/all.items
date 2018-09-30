@@ -97,7 +97,7 @@ Number TemperTerrace "Балкон [%.1f °C]"    <temperature>    (gTerrace,gTe
 Number TemperTerraceDHT "DHT [%.1f °C]"    <temperature>    (gTerrace,gTemperature)      {mqtt="<[mysensors:/terrace/state/dhttemp:state:default]"}
 */
 
-String TemperRoom "Комната [JS(tempsensor.js):%s]"    	<temperature> (gHall,gGraphTemper,gHallValues,gTemperature) 	{mqtt="<[mysensors:/terrace/state/temp/000091:state:default]"}
+String TemperRoom "Комната [JS(tempsensor.js):%s]"    	<temperature> (gHall,gGraphTemper,gHallValues,gTemperature) 	{mqtt="<[mysensors:/co2-3984651/state/temp/343A31:state:default]"}
 String TemperTerrace "Балкон [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gGraphTemper,gHallValues,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/000090:state:default]"}
 String TemperOutside  "Улица [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gOutside,gGraphTemper,gHallValues,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/1504CD:state:default]"}
 String TemperDHT  	"DHT [JS(tempsensor.js):%s]" 		<temperature> (gTerrace,gTemperature) 			{mqtt="<[mysensors:/terrace/state/dht/temp:state:default]"}
