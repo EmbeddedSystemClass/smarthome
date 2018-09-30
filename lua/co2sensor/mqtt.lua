@@ -58,7 +58,7 @@ function calibrate(m, pl)
     run_calib(tonumber(pl))
 end
 
-
+-- Start calibration procedure
 function run_calib(sec)
     calib_tmr = tmr.create()
     calib_flt = moving_average(sec)
@@ -68,9 +68,9 @@ function run_calib(sec)
         if sec > 0 then
             rzero = calib_flt:get_value(gas.get_rzero())
             sec = sec - 1
-            print("Rzero calibration (" .. sec .. "): " .. rzero)
+            print("Calibrating (" .. sec .. "): " .. rzero)
         else
-            print("Done: ", rzero)
+            print("Done: rzero = " .. rzero)
             gas.set_rzero(rzero)
             fs.save_value("rzero.txt", rzero)
             tmr.unregister(calib_tmr)
@@ -181,6 +181,7 @@ end
 
 ds18b20.setup(GPIO_ONEWIRE)
 
+-- Init calibration coefs
 local rzero = fs.init_value("rzero.txt", nil)
 if rzero ~= nil then
     print("mq135: rzero = " .. rzero)
@@ -189,7 +190,6 @@ else
     fs.save_value("rzero.txt", gas.get_rzero())
 end
 
-m_dis[MQTT_MAINTOPIC .. '/cmd/dummy'] = dummy
 m_dis[MQTT_MAINTOPIC .. '/cmd/calibrate'] = calibrate
 
 -- Connect to the broker
