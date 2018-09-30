@@ -1,0 +1,3 @@
+String CO2Ppm "Концентрация [%s ppm]" <carbondioxide> (gCO2) {mqtt="<[mysensors:/co2-3984651/state/gas/ppm:state:default]"}
+String CO2PpmF "Концентрация (filtered) [%s ppm]" <carbondioxide> (gCO2) {mqtt="<[mysensors:/co2-3984651/state/gas/fppm:state:default]"}
+Number gas_period ""
