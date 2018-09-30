@@ -4,12 +4,15 @@ local pub_tmr = tmr.create()
 local service_tmr = tmr.create()
 local temperature = {}
 
-gas = require("mq135")
+local gas = require("mq135")
+local moving_average = require("filter")
+local fs = require("fs")
+
+local filter = moving_average(10)
 
 -- Holds keys and callbacks to different topics
 local m_dis = {}
 
-m_dis[MQTT_MAINTOPIC .. '/cmd/dummy'] = dummy
 
 -- initialize mqtt client with keepalive timer of 60sec
 if m == nil then
@@ -29,7 +32,6 @@ function service_pub()
     hh = (time / 3600) % 24
     mm = (time / 60) % 60
     local str = string.format("%dd %dh %dm", dd, hh, mm)
-    --print(str)
     m:publish("/"..MQTT_CLIENTID.."/state/uptime", str, 0, 1, nil)
     ip = wifi.sta.getip()
     if ip == nil then
@@ -45,6 +47,41 @@ end
 
 function get_sensor_id(addr)
     return ('%02X%02X%02X'):format(addr:byte(6,8))
+end
+
+local calib_tmr
+local calib_flt
+local calib_cnt = 0
+
+
+function calibrate(m, pl)
+    run_calib(tonumber(pl))
+end
+
+
+function run_calib(sec)
+    calib_tmr = tmr.create()
+    calib_flt = moving_average(sec)
+    local rzero
+    
+    tmr.register(calib_tmr, 1000, tmr.ALARM_AUTO, function (t)
+        if sec > 0 then
+            rzero = calib_flt:get_value(gas.get_rzero())
+            sec = sec - 1
+            print("Rzero calibration (" .. sec .. "): " .. rzero)
+        else
+            print("Done: ", rzero)
+            gas.set_rzero(rzero)
+            fs.save_value("rzero.txt", rzero)
+            tmr.unregister(calib_tmr)
+            calib_tmr = nil
+            
+            local str = string.format("%f", rzero)
+            m:publish("/"..MQTT_CLIENTID.."/state/gas/rzero", str, 0, 1, nil)
+        end
+    end)
+
+    tmr.start(calib_tmr)
 end
 
  --Publish measurements
@@ -74,18 +111,14 @@ function pub()
         end
     end
 
-    --publish gas data
+    --publish CO2 data
     local str = string.format("%0.2f", gas.get_ppm())
     print("ppm:", str)
     m:publish("/"..MQTT_CLIENTID.."/state/gas/ppm", str, 0, 0, nil)
 
-    local str = string.format("%0.2f", gas.get_fppm())
+    local str = string.format("%0.2f", filter:get_value(gas.get_ppm()))
     print("fppm:", str)
     m:publish("/"..MQTT_CLIENTID.."/state/gas/fppm", str, 0, 0, nil)
-
-    local str = string.format("%0.3f", gas.get_rzero())
-    print("rzero:", str)
-    m:publish("/"..MQTT_CLIENTID.."/state/gas/rzero", str, 0, 0, nil)
 
     local str = string.format("%0.3f", gas.get_volt())
     m:publish("/"..MQTT_CLIENTID.."/state/gas/volt", str, 0, 0, nil)
@@ -147,6 +180,17 @@ end
 
 
 ds18b20.setup(GPIO_ONEWIRE)
+
+local rzero = fs.init_value("rzero.txt", nil)
+if rzero ~= nil then
+    print("mq135: rzero = " .. rzero)
+    gas.set_rzero(rzero)
+else 
+    fs.save_value("rzero.txt", gas.get_rzero())
+end
+
+m_dis[MQTT_MAINTOPIC .. '/cmd/dummy'] = dummy
+m_dis[MQTT_MAINTOPIC .. '/cmd/calibrate'] = calibrate
 
 -- Connect to the broker
 do_mqtt_connect()

@@ -6,7 +6,6 @@ end
 _G[modname] = M
 
 local adc = adc
-local moving_average = require "filter"
 
 setfenv(1,M)
 
@@ -23,7 +22,6 @@ local PARB = 2.769034857
 
 adc.force_init_mode(adc.INIT_ADC)
 
-local filter = moving_average(10)
 
 function get_raw()
     return adc.read(0)
@@ -41,12 +39,12 @@ function get_ppm()
     return PARA * ((get_resist()/RZERO) ^ (-PARB))
 end
 
-function get_fppm()
-    return filter:get_value(get_ppm())
-end
-
 function get_rzero()
     return get_resist() * ((ATMOCO2 / PARA) ^ (1./PARB))
+end
+
+function set_rzero(val)
+    RZERO = val
 end
 
 
