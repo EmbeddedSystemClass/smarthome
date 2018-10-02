@@ -58,6 +58,10 @@ function pub()
     --Get temperature and air pressure
     P, T = bme280.baro()
     if T ~= nil and P ~= nil then
+        --print(string.format("T=%0.1f", T / 1000))
+        local str = string.format("%.1f", T / 100)
+        m:publish("/"..MQTT_CLIENTID.."/state/temp", str, 0, 0, nil)
+
         --print(string.format("QFE=%0.3f", P / 1000))
         local str = string.format("%.1f", P / 1000)
         m:publish("/"..MQTT_CLIENTID.."/state/pressure", str, 0, 0, nil)
