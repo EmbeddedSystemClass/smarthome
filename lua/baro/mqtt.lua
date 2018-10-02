@@ -1,7 +1,10 @@
 local PUBLISH_PERIOD = 10 * 1000
 local SERVICE_PERIOD = 60 * 1000
 local MQTT_KEEPALIVE = 60
-local ALT = 320
+local ALT = 194
+
+local BMP280 = 1
+local BME280 = 2
 
 local pub_tmr = tmr.create()
 local service_tmr = tmr.create()
@@ -51,33 +54,46 @@ end
  --Publish measurements
 function pub()
     LedBlink(50)
-    
-    --Tmperature
-    if (temp ~= nil) then
-        local str = string.format("%0.1f", temp)
-        m:publish("/"..MQTT_CLIENTID.."/state/temp", str, 0, 0, nil)
+
+    --Get temperature and air pressure
+    P, T = bme280.baro()
+    if T ~= nil and P ~= nil then
+        --print(string.format("QFE=%0.3f", P / 1000))
+        local str = string.format("%.1f", P / 1000)
+        m:publish("/"..MQTT_CLIENTID.."/state/pressure", str, 0, 0, nil)
+   
+        --Convert measured air pressure to sea level pressure
+        QNH = bme280.qfe2qnh(P, ALT)
+        if QNH ~= nil then
+            --print(string.format("QNH=%0.3f", QNH / 1000))
+            local str = string.format("%.1f", P / 1000)
+            m:publish("/"..MQTT_CLIENTID.."/state/qnh", str, 0, 0, nil)
+       
+            curAlt = bme280.altitude(P, QNH)
+            local curAltsgn = (curAlt < 0 and -1 or 1); curAlt = curAltsgn * curAlt
+            --print(string.format("altitude=%s%f", curAltsgn < 0 and "-" or "", curAlt / 100))
+            local str = string.format("%.1f", curAlt / 100)
+            m:publish("/"..MQTT_CLIENTID.."/state/altitude", str, 0, 0, nil)
+        end
     end
 
-    --bme280
-    T, P, H, QNH = bme280.read(ALT)
-    
-    if T ~= nil and P ~= nil and H ~= nil and QNH ~= nil then 
-        local Tsgn = (T < 0 and -1 or 1); T = Tsgn*T
-        print(string.format("T=%s%d.%02d", Tsgn<0 and "-" or "", T/100, T%100))
-        print(string.format("QFE=%d.%03d", P/1000, P%1000))
-        print(string.format("QNH=%d.%03d", QNH/1000, QNH%1000))
-        print(string.format("humidity=%d.%03d%%", H/1000, H%1000))
+    --Get humidity
+    H, T = bme280.humi()
+    if T ~= nil and H ~= nil then
+        local Tsgn = (T < 0 and -1 or 1); T = Tsgn * T
+        --print(string.format("T=%s%0.2f", Tsgn < 0 and "-" or "", T / 100))
+        --print(string.format("humidity=%d0.3f%%", H / 1000, H % 1000))
+        local str = string.format("%.1f", H / 100)
+        m:publish("/"..MQTT_CLIENTID.."/state/humidity", str, 0, 0, nil)
+        
+        --Calc dew point
         D = bme280.dewpoint(H, T)
-        local Dsgn = (D < 0 and -1 or 1); D = Dsgn*D
-        print(string.format("dew_point=%s%d.%02d", Dsgn<0 and "-" or "", D/100, D%100))
-    end
-
-    -- altimeter function - calculate altitude based on current sea level pressure (QNH) and measure pressure
-    P = bme280.baro()
-    if P ~= nil and QNH ~= nil then
-        curAlt = bme280.altitude(P, QNH)
-        local curAltsgn = (curAlt < 0 and -1 or 1); curAlt = curAltsgn*curAlt
-        print(string.format("altitude=%s%d.%02d", curAltsgn<0 and "-" or "", curAlt/100, curAlt%100))
+        if D ~= nil then
+            local Dsgn = (D < 0 and -1 or 1); D = Dsgn*D
+            --print(string.format("dew_point=%s%0.2f", Dsgn < 0 and "-" or "", D / 100))
+            local str = string.format("%.1f", D / 100)
+            m:publish("/"..MQTT_CLIENTID.."/state/dewpoint", str, 0, 0, nil)
+        end
     end
 end
 
@@ -145,7 +161,15 @@ m_dis[MQTT_MAINTOPIC .. '/cmd/dummy'] = dummy
 
 --Init bme280
 i2c.setup(0, GPIO_SDA, GPIO_SCL, i2c.SLOW) -- call i2c.setup() only once
-print(bme280.setup())
+
+local type = bme280.setup()
+if type == nil then
+    print("No sensor found")
+elseif type == BMP280 then
+    print("Found bmp280")
+elseif type == BME280 then
+    print("Found bme280")
+end
 
 --Connect to the broker
 do_mqtt_connect()
