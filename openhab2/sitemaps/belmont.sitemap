@@ -22,6 +22,29 @@ sitemap belmont label="Home" {
 			Text item=ValveState
 			//Text item=Flood
 		}
+		Text label="Углекислый газ" icon="carbondioxide" {
+			Text item=CO2Ppm
+			Switch item=gas_period icon=calendar mappings=[0="H", 1="4H", 2="8H", 3="12H", 4="D"]
+			Text item=CO2PpmF
+
+			Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=CO2Ppm&theme=black&period=D&h=300&w=850" visibility=[gas_period==4]
+			Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=CO2Ppm&theme=black&period=12h&h=300&w=850" visibility=[gas_period==3]
+			Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=CO2Ppm&theme=black&period=8h&h=300&w=850" visibility=[gas_period==2]
+			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=CO2Ppm&theme=black&period=4h&h=300&w=850" visibility=[gas_period==1]
+			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=CO2Ppm&theme=black&period=h&h=300&w=850" visibility=[gas_period==0, gas_period=="Uninitialized", gas_period=="Undefined"]
+
+			Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=CO2PpmF&theme=black&period=D&h=300&w=850" visibility=[gas_period==4]
+			Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=CO2PpmF&theme=black&period=12h&h=300&w=850" visibility=[gas_period==3]
+			Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=CO2PpmF&theme=black&period=8h&h=300&w=850" visibility=[gas_period==2]
+			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=CO2PpmF&theme=black&period=4h&h=300&w=850" visibility=[gas_period==1]
+			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=CO2PpmF&theme=black&period=h&h=300&w=850" visibility=[gas_period==0, gas_period=="Uninitialized", gas_period=="Undefined"]
+
+			Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=CO2Ppm,CO2PpmF&theme=black&period=D&h=300&w=850" visibility=[gas_period==4]
+			Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=CO2Ppm,CO2PpmF&theme=black&period=12h&h=300&w=850" visibility=[gas_period==3]
+			Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=CO2Ppm,CO2PpmF&theme=black&period=8h&h=300&w=850" visibility=[gas_period==2]
+			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=CO2Ppm,CO2PpmF&theme=black&period=4h&h=300&w=850" visibility=[gas_period==1]
+			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=CO2Ppm,CO2PpmF&theme=black&period=h&h=300&w=850" visibility=[gas_period==0, gas_period=="Uninitialized", gas_period=="Undefined"]
+		}
 	}
 
 	Frame {	
@@ -40,6 +63,7 @@ sitemap belmont label="Home" {
 			Frame label="Комната" {
 				Switch item=Sock2 icon="light"
 				Text item=TemperRoom label="Температура"
+				Text item=CO2Ppm icon="carbondioxide"
 			}
 		}
 		Text label="Балкон" icon="terrace" {
@@ -134,15 +158,6 @@ sitemap belmont label="Home" {
 				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldLevel&theme=black&period=W&h=300&w=850" visibility=[bat_period==2]
 				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldLevel&theme=black&period=3D&h=300&w=850" visibility=[bat_period==1]
 				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=BatshieldLevel&theme=black&period=D&h=300&w=850" visibility=[bat_period==0]				
-			}
-			Text label="Gas" icon="carbondioxide" {
-				Text item=GassensVolt
-				Switch item=gas_period icon=calendar mappings=[0="H", 1="4H", 2="8H", 3="12H", 4="D"]
-				Image refresh=5000 url="http://localhost:8080/rrdchart.png?items=GassensVolt&theme=black&period=D&h=300&w=850" visibility=[gas_period==4]
-				Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=GassensVolt&theme=black&period=12h&h=300&w=850" visibility=[gas_period==3]
-				Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=GassensVolt&theme=black&period=8h&h=300&w=850" visibility=[gas_period==2]
-				Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=GassensVolt&theme=black&period=4h&h=300&w=850" visibility=[gas_period==1]
-				Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=GassensVolt&theme=black&period=h&h=300&w=850" visibility=[gas_period==0, gas_period=="Uninitialized", gas_period=="Undefined"]
 			}
 		}
 		Group item=gVac {

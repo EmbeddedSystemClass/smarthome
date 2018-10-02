@@ -3,6 +3,3 @@ String BatshieldVolt "Напряжение [%s В]" <energy> {mqtt="<[mysensors:
 String BatshieldRaw "АЦП [%d]" <battery> {mqtt="<[mysensors:/batshield-44528/state/bat/raw:state:default]"}
 DateTime BatshieldUpdated "Обновлено [%1$tm.%1$td.%1$tY %1$tr]" <time>
 Number bat_period ""
-
-String GassensVolt "CO2 [%s В]" <carbondioxide> {mqtt="<[mysensors:/gas-1ad365/gas/voltage:state:default]"}
-Number gas_period ""
