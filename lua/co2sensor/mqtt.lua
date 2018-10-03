@@ -8,11 +8,14 @@ local gas = require("mq135")
 local moving_average = require("filter")
 local fs = require("fs")
 
-local filter = moving_average(10)
+local filter = moving_average(20)
+local ufilter = moving_average(20)
 
 -- Holds keys and callbacks to different topics
 local m_dis = {}
 
+local calib_tmr
+local calib_flt
 
 -- initialize mqtt client with keepalive timer of 60sec
 if m == nil then
@@ -49,11 +52,27 @@ function get_sensor_id(addr)
     return ('%02X%02X%02X'):format(addr:byte(6,8))
 end
 
-local calib_tmr
-local calib_flt
-local calib_cnt = 0
+--Check ppm level and control leds
+function check_alarm(ppm)
+    if ppm >= PPM_ALARM_HI then
+        --Red
+        print("Hi ppm alarm!")
+        gpio.write(GPIO_ALARM_RLED, gpio.LOW)
+        gpio.write(GPIO_ALARM_GLED, gpio.HIGH)
+    elseif ppm >= PPM_ALARM_LOW then
+        --Yellow
+        print("Low ppm alarm!")
+        gpio.write(GPIO_ALARM_RLED, gpio.LOW)
+        gpio.write(GPIO_ALARM_GLED, gpio.LOW)
+    else
+        --Off
+        print("Ppm OK")
+        gpio.write(GPIO_ALARM_RLED, gpio.HIGH)
+        gpio.write(GPIO_ALARM_GLED, gpio.HIGH)
+    end
+end
 
-
+-- Calibration cmd handler
 function calibrate(m, pl)
     run_calib(tonumber(pl))
 end
@@ -75,6 +94,7 @@ function run_calib(sec)
             fs.save_value("rzero.txt", rzero)
             tmr.unregister(calib_tmr)
             calib_tmr = nil
+            calib_flt = nil
             
             local str = string.format("%f", rzero)
             m:publish("/"..MQTT_CLIENTID.."/state/gas/rzero", str, 0, 1, nil)
@@ -116,9 +136,15 @@ function pub()
     print("ppm:", str)
     m:publish("/"..MQTT_CLIENTID.."/state/gas/ppm", str, 0, 0, nil)
 
-    local str = string.format("%0.2f", filter:get_value(gas.get_ppm()))
+    local ppm = filter:get_value(gas.get_ppm())
+    check_alarm(ppm)
+    local str = string.format("%0.2f", ppm)
     print("fppm:", str)
     m:publish("/"..MQTT_CLIENTID.."/state/gas/fppm", str, 0, 0, nil)
+
+    local str = string.format("%0.2f", ufilter:get_uvalue(gas.get_ppm()))
+    print("uppm:", str)
+    m:publish("/"..MQTT_CLIENTID.."/state/gas/uppm", str, 0, 0, nil)
 
     local str = string.format("%0.3f", gas.get_volt())
     m:publish("/"..MQTT_CLIENTID.."/state/gas/volt", str, 0, 0, nil)
@@ -180,6 +206,12 @@ end
 
 
 ds18b20.setup(GPIO_ONEWIRE)
+
+gpio.mode(GPIO_ALARM_RLED, gpio.OUTPUT)
+gpio.write(GPIO_ALARM_RLED, gpio.HIGH)
+
+gpio.mode(GPIO_ALARM_GLED, gpio.OUTPUT)
+gpio.write(GPIO_ALARM_GLED, gpio.HIGH)
 
 -- Init calibration coefs
 local rzero = fs.init_value("rzero.txt", nil)

@@ -1,6 +1,8 @@
 -- GPIOS
-GPIO_LED = 4
-GPIO_ONEWIRE = 7
+GPIO_LED = GPIO0
+GPIO_ALARM_RLED = GPIO16
+GPIO_ALARM_GLED = GPIO5
+GPIO_ONEWIRE = GPIO13
 
 -- WiFi networks list in format [SSID] = password
 WIFI_AUTH = {
