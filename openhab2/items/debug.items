@@ -1,5 +1,5 @@
 String BatshieldLevel "Заряд [%s%%]" <batterylevel> {mqtt="<[mysensors:/batshield-44528/state/bat/level:state:default]"}
 String BatshieldVolt "Напряжение [%s В]" <energy> {mqtt="<[mysensors:/batshield-44528/state/bat/volt:state:default]"}
 String BatshieldRaw "АЦП [%d]" <battery> {mqtt="<[mysensors:/batshield-44528/state/bat/raw:state:default]"}
-DateTime BatshieldUpdated "Обновлено [%1$tm.%1$td.%1$tY %1$tr]" <time>
+DateTime BatshieldUpdated "Обновлено [%1$td.%1$tm.%1$tY %1$tr]" <time>
 Number bat_period ""
