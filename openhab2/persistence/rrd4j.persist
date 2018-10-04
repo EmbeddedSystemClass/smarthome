@@ -13,6 +13,8 @@ Items {
 	GassensVolt : strategy = everySecond, restoreOnStartup
 	CO2Ppm : strategy = everySecond, restoreOnStartup
 	CO2PpmF : strategy = everySecond, restoreOnStartup
+	CO2PpmU : strategy = everySecond, restoreOnStartup
+	Pressure : strategy = everySecond, restoreOnStartup
 	MyDevice : strategy = everySecond, everyChange, restoreOnStartup
 	gParams* : strategy = everyChange, restoreOnStartup
 	gStates* : strategy = everyChange, restoreOnStartup
