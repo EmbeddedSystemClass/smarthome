@@ -7,8 +7,8 @@ DEFMODE=noflash
 PORT=${1:-$DEFPORT}
 MODE=${2:-$DEFMODE}
 BAUD=115200
-FW=./fw/nodemcu-master-21-modules-2017-03-20-19-10-23-float.bin
-
+FW=nodemcu-master-24-modules-2018-09-20-13-22-49-float.bin
+FILE=$(cd `dirname $0` && pwd)/$FW
 
 if [[ $MODE != "noflash" ]]; then
     MODE=$DEFMODE
@@ -21,7 +21,7 @@ if [[ $MODE = "reflash" ]]; then
     
     #Flash chip
     echo "Programming..."
-    sudo $ESPTOOL --port $PORT write_flash -fm qio 0x00000 $FW
+    $ESPTOOL --port $PORT write_flash -fm qio 0x00000 $FILE
     if [[ $? != 0 ]]; then 
         exit 
     fi
@@ -34,19 +34,19 @@ fi
 
 #Clear files on flash memory
 echo "Clearing..."
-sudo $LUATOOL -p $PORT -b $BAUD --wipe
+$LUATOOL -p $PORT -b $BAUD --wipe
 echo
 
 sleep 3
 
 #Do upload
-for fname in ./*.lua ./*.tmpl; do
+for fname in ./*.lua; do
 	echo "Uploading: $fname..."
-	sudo $LUATOOL -p $PORT -b $BAUD -f ./$fname --bar
+	$LUATOOL -p $PORT -b $BAUD -f ./$fname --bar
 done
 
 #Verify uploaded file list
-list=$(sudo $LUATOOL -p $PORT -b $BAUD --list | awk -F '[:,]' '/^name/{print $2}')
+list=$($LUATOOL -p $PORT -b $BAUD --list | awk -F '[:,]' '/^name/{print $2}')
 
 if [[ $(echo ${files[@]} ${list[@]} | tr ' ' '\n' | sort | uniq -d | wc -l) == ${#files[@]} ]]; then
 	echo "---------------"
