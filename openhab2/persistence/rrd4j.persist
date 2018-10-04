@@ -15,6 +15,7 @@ Items {
 	CO2PpmF : strategy = everySecond, restoreOnStartup
 	CO2PpmU : strategy = everySecond, restoreOnStartup
 	Pressure : strategy = everySecond, restoreOnStartup
+	Pressure_mmHg : strategy = everySecond, restoreOnStartup
 	MyDevice : strategy = everySecond, everyChange, restoreOnStartup
 	gParams* : strategy = everyChange, restoreOnStartup
 	gStates* : strategy = everyChange, restoreOnStartup

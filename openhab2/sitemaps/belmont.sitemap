@@ -48,6 +48,7 @@ sitemap belmont label="Home" {
 		}
 		Text label="Давление" icon="pressure" {
 			Text item=Pressure
+			Text item=Pressure_mmHg
 			Text item=Altitude
 			Switch item=baro_period icon=calendar mappings=[0="12H", 1="D", 2="3D", 3="W", 4="M"]
 
@@ -56,6 +57,12 @@ sitemap belmont label="Home" {
 			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure&theme=black&period=3D&h=300&w=850" visibility=[baro_period==2]
 			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure&theme=black&period=D&h=300&w=850" visibility=[baro_period==1]
 			Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=Pressure&theme=black&period=12h&h=300&w=850" visibility=[baro_period==0, baro_period=="Uninitialized", baro_period=="Undefined"]
+		
+			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure,Pressure_mmHg&theme=black&period=M&h=300&w=850" visibility=[baro_period==4]
+			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure,Pressure_mmHg&theme=black&period=W&h=300&w=850" visibility=[baro_period==3]
+			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure,Pressure_mmHg&theme=black&period=3D&h=300&w=850" visibility=[baro_period==2]
+			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure,Pressure_mmHg&theme=black&period=D&h=300&w=850" visibility=[baro_period==1]
+			Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=Pressure,Pressure_mmHg&theme=black&period=12h&h=300&w=850" visibility=[baro_period==0, baro_period=="Uninitialized", baro_period=="Undefined"]
 		}
 	}
 
