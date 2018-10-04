@@ -1,0 +1,4 @@
+String Pressure "Давление [%s hPa]" <pressure> (gPressure) {mqtt="<[mysensors:/baro-13811663/state/pressure:state:default]"}
+String BaroTemp "Температура [%s C]" <temperature> (gTemperature) {mqtt="<[mysensors:/baro-13811663/state/temp:state:default]"}
+String Altitude "Высота [%s m]" <flowpipe> {mqtt="<[mysensors:/baro-13811663/state/altitude:state:default]"}
+Number baro_period ""
