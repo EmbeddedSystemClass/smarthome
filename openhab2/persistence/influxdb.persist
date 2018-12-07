@@ -7,8 +7,11 @@ Strategies {
 }
  
 Items {
-	CO2PpmU : strategy = everyUpdate 
+	CO2PpmU : strategy = everyUpdate
+	CO2Temp : strategy = everyUpdate
 	BaroTemp : strategy = everyUpdate
+	HumiTemp : strategy = everyUpdate
 	HumiHumidity : strategy = everyUpdate
-	gTemperature* : strategy = everyUpdate
+	TerraceTempIn : strategy = everyUpdate
+	TerraceTempOut : strategy = everyUpdate
 }
