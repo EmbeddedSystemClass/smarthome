@@ -4,7 +4,7 @@ Strategies {
 }
 
 Items {
-	TemperRoom : strategy = everySecond, restoreOnStartup
+	CO2Temp : strategy = everySecond, restoreOnStartup
 	TemperTerrace : strategy = everySecond, restoreOnStartup
 	TemperOutside : strategy = everySecond, restoreOnStartup
 	BaroTemp : strategy = everySecond, restoreOnStartup

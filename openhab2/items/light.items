@@ -1,4 +1,4 @@
-Switch Sock2 "Торшер" <light> (gHall,gLight) {mqtt="
+Switch FloorLamp "Торшер" <light> (gHall,gLight) {mqtt="
     >[mysensors:/socket-153971/cmd/power:command:ON:1],
     >[mysensors:/socket-153971/cmd/power:command:OFF:0],
     <[mysensors:/socket-153971/state/power:state:default]", autoupdate="false"}

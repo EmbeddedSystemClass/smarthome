@@ -6,15 +6,15 @@ sitemap sweethome label="Home" {
 		Group item=gLight label="Свет" icon="light"
 		// Group item=gTemperature label="Температура" icon="temperature"
 		Text label="Температура" icon="temperature" {
-			Text item=TemperTerrace
-			Text item=TemperOutside
-			Text item=TemperRoom
+			Text item=TerraceTempIn
+			Text item=TerraceTempOut
+			Text item=CO2Temp
 			Text item=BaroTemp
-			Text item=HumiTemperature
+			Text item=HumiTemp
 			Image refresh=10000 url="http://localhost:8080/rrdchart.png?groups=gGraphTemper&theme=black&period=d&h=300&w=850"
 		}
 		Text label="Влажность" icon="humidity" {
-			Text item=HumidityTerrace 
+			Text item=TerraceHumidity 
 			Text item=HumiHumidity
 			Image refresh=10000 url="http://localhost:8080/rrdchart.png?groups=gGraphHumi&theme=black&period=d&h=300&w=850"
 		}
@@ -75,16 +75,16 @@ sitemap sweethome label="Home" {
 		} 
 		Text label="Комната" icon="sofa" {
 			Frame label="Комната" {
-				Switch item=Sock2 icon="light"
-				Text item=TemperRoom label="Температура"
+				Switch item=FloorLamp icon="light"
+				Text item=CO2Temp label="Температура"
 				Text item=CO2Ppm icon="carbondioxide"
 			}
 		}
 		Text label="Балкон" icon="terrace" {
 			Frame label="Балкон" {
-				Text item=TemperTerrace label="Внутри"
-				Text item=TemperOutside label="За окном"
-				Text item=HumidityTerrace label="Влажность"
+				Text item=TerraceTempIn label="Внутри"
+				Text item=TerraceTempOut label="За окном"
+				Text item=TerraceHumidity label="Влажность"
 			}
 		}
 		Text label="Полив" icon="lawnmower" {
