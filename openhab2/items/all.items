@@ -1,5 +1,3 @@
-Basement Monitor Group All
-
 Group gComm
 Group gHall
 Group gHallValues
@@ -13,82 +11,15 @@ Group gGraphHumi
 Group gCorridor
 Group gParams
 Group gStates
+Group gHumidity
 Group gTemperature (All)
 
 Number chart_period ""
-
-Switch Sock2 "Торшер" <light> (gHall,gLight) {mqtt="
-    >[mysensors:/socket-153971/cmd/power:command:ON:1],
-    >[mysensors:/socket-153971/cmd/power:command:OFF:0],
-    <[mysensors:/socket-153971/state/power:state:default]", autoupdate="false"}
-
-Switch Kitchentable "Столешница" <light> (gKitchen,gLight) {mqtt="
-    >[mysensors:/switch-4377794/cmd/power:command:ON:1],
-    >[mysensors:/switch-4377794/cmd/power:command:OFF:0],
-    <[mysensors:/switch-4377794/state/power:state:default]", autoupdate="false"}
-
-Switch NightLight "Лампа" <light> (gKitchen, gLight) {mqtt="
-    >[mysensors:/socket-8780089/cmd/power:command:ON:1],
-    >[mysensors:/socket-8780089/cmd/power:command:OFF:0],
-    <[mysensors:/socket-8780089/state/power:state:default]", autoupdate="false"}
-
-
-Number Water "" <water> (gHall) {mqtt=">[mysensors:/water/cmd/stop:command:0:1],>[mysensors:/water/cmd/run:command:1:1],>[mysensors:/water/cmd/run:command:2:2],>[mysensors:/water/cmd/run:command:3:3],>[mysensors:/water/cmd/run:command:4:4],>[mysensors:/water/cmd/run:command:5:5],<[mysensors:/water/state/status:state:default]"}
-DateTime LastWatered "Последний автозапуск [%1$tm.%1$td.%1$tY %1$tT]" <time> (gStates)
-
-Number WateringHour "" (gParams, gHall)
-Number WateringMinute "" (gParams, gHall)
-Number WaterRemainTime "До след. включения [%s]" (gHall)
-
-Number Duration_1 "" (gParams, gHall)
-DateTime Timestamp_1 "Г1 полито [%1$tm.%1$td.%1$tY %1$tT]" <time> (gStates)
-Number Duration_2 "" (gParams, gHall)
-DateTime Timestamp_2 "Г2 полито [%1$tm.%1$td.%1$tY %1$tT]" <time> (gStates)
-Number Duration_3 "" (gParams, gHall)
-DateTime Timestamp_3 "Г3 полито [%1$tm.%1$td.%1$tY %1$tT]" <time> (gStates)
-Number Duration_4 "" (gParams, gHall)
-DateTime Timestamp_4 "Г4 полито [%1$tm.%1$td.%1$tY %1$tT]" <time> (gStates)
-
-Switch Pump_1 "Помпа (П1)" <water> (gHall)
-/*
-Switch Pump_1 "Помпа (П1)" <water> (gHall) {mqtt="
-    >[mysensors:/socket-8780089/cmd/power:command:ON:1],
-    >[mysensors:/socket-8780089/cmd/power:command:OFF:0],
-    <[mysensors:/socket-8780089/state/power:state:default]", autoupdate="false"}
-*/
-Switch Pump_2 "Помпа (П2)" <water> (gHall) {mqtt="
-    >[mysensors:/plantfactory/cmd/filltank:command:ON:1],
-    >[mysensors:/plantfactory/cmd/stop:command:OFF:0],
-    <[mysensors:/plantfactory/state/pump:state:default]"}
-    
-Switch Pump_3 "Помпа (П3)" <water> (gHall) {mqtt="
-    >[mysensors:/plantfactory2/cmd/filltank:command:ON:1],
-    >[mysensors:/plantfactory2/cmd/stop:command:OFF:0],
-    <[mysensors:/plantfactory2/state/pump:state:default]"}
-
-Number Duration_Pump_1 "" (gParams, gHall)
-DateTime Timestamp_Pump_1 "П1 полито [%1$tm.%1$td.%1$tY %1$tT]" <time> (gStates)
-
-Number Duration_Pump_2 "" (gParams, gHall)
-DateTime Timestamp_Pump_2 "П2 полито [%1$tm.%1$td.%1$tY %1$tT]" <time> (gStates)
-
-Number Duration_Pump_3 "" (gParams, gHall)
-DateTime Timestamp_Pump_3 "П3 полито [%1$tm.%1$td.%1$tY %1$tT]" <time> (gStates)
 
 
 String Uptime "Uptime [%s]" <clock> 	{mqtt="<[mysensors:/weather/stat/uptime:state:default]"}
 
 Number Pir "Движение [MAP(pir.map):%s]" <motion> (gComm,gCorridor)      {mqtt="<[mysensors:/pir/stat/motion:state:default]"}
-
-Number MiWF "" {mqtt="<[mysensors:/presence/mi:state:default]"}
-Number MiBT "" {mqtt="<[mysensors:/presence/mibt:state:default]"}
-
-Number Mi5CWF "" {mqtt="<[mysensors:/presence/mi5c:state:default]"}
-Number Mi5CBT "" {mqtt="<[mysensors:/presence/mi5cbt:state:default]"}
-
-
-Number Pasha "Паша [MAP(athome.map):%s]" <boy_1> (gHall, gComm)
-Number Alina "Алина [MAP(athome.map):%s]" <girl_3> (gHall, gComm)
 
 /*
 Number TemperRoom "Комната [%.1f °C]"    <temperature>    (gHall,gHallValues,gTemperature)      {mqtt="<[mysensors:/weather/state/temp/16031B:state:default]"}
@@ -96,18 +27,3 @@ String TemperRoomError "[Ошибка]"    	 <temperature>	  (gTemperature)	 {mq
 Number TemperTerrace "Балкон [%.1f °C]"    <temperature>    (gTerrace,gTemperature)      {mqtt="<[mysensors:/terrace/state/temp:state:default]"}
 Number TemperTerraceDHT "DHT [%.1f °C]"    <temperature>    (gTerrace,gTemperature)      {mqtt="<[mysensors:/terrace/state/dhttemp:state:default]"}
 */
-
-String TemperRoom "Комната [JS(tempsensor.js):%s]"    	<temperature> (gHall,gGraphTemper,gHallValues,gTemperature) 	{mqtt="<[mysensors:/co2-3984651/state/temp/343A31:state:default]"}
-String TemperTerrace "Балкон [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gGraphTemper,gHallValues,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/000090:state:default]"}
-String TemperOutside  "Улица [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gOutside,gGraphTemper,gHallValues,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/1504CD:state:default]"}
-String TemperDHT  	"DHT [JS(tempsensor.js):%s]" 		<temperature> (gTerrace,gTemperature) 			{mqtt="<[mysensors:/terrace/state/dht/temp:state:default]"}
-String LwtTerrace  	"" (gTerrace) 	{mqtt="<[mysensors:/lwt/terrace:state:default]"}
-
-
-Number HumidityTerrace "Влажность [JS(humisensor.js):%s]" <humidity>    (gHallValues,gGraphHumi)      {mqtt="<[mysensors:/terrace/state/dht/humi:state:default]"}
-
-Number Valves "Краны" <faucet> (gWater) {mqtt=">[mysensors:/aquastor/cmd/valve:command:0:OFF],>[mysensors:/aquastor/cmd/valve:command:1:ON]"}
-String ValveState "Cостояние [MAP(valve.map):%s]" <faucet> (gWater) 	{mqtt="<[mysensors:/aquastor/state/valve:state:default]"}
-String Flood "Протечка [MAP(flood.map):%s]" <rain> (gWater) 	{mqtt="<[mysensors:/aquastor/state/alarm:state:default]"}
-
-

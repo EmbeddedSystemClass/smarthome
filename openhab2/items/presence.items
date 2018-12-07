@@ -1,3 +1,12 @@
 Switch MyDevice <boy_1> { channel="network:pingdevice:devicename:online" }
 Number MyDeviceResponseTime <boy_1> { channel="network:pingdevice:devicename:latency" }
 DateTime MyDeviceLastSeen <boy_1> { channel="network:pingdevice:devicename:lastseen" }
+
+Number MiWF "" {mqtt="<[mysensors:/presence/mi:state:default]"}
+Number MiBT "" {mqtt="<[mysensors:/presence/mibt:state:default]"}
+
+Number Mi5CWF "" {mqtt="<[mysensors:/presence/mi5c:state:default]"}
+Number Mi5CBT "" {mqtt="<[mysensors:/presence/mi5cbt:state:default]"}
+
+Number Pasha "Паша [MAP(athome.map):%s]" <boy_1> (gHall, gComm)
+Number Alina "Алина [MAP(athome.map):%s]" <girl_3> (gHall, gComm)
