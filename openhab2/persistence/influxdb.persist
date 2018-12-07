@@ -1,0 +1,14 @@
+Strategies {
+	everySecond : "* * * * * ?"
+	everyMinute : "0 * * * * ?"
+	everyHour : "0 0 * * * ?"
+	everyDay : "0 0 0 * * ?"
+	every2Minutes : "0 */2 * ? * *"
+}
+ 
+Items {
+	CO2PpmU : strategy = everyUpdate 
+	BaroTemp : strategy = everyUpdate
+	HumiHumidity : strategy = everyUpdate
+	gTemperature* : strategy = everyUpdate
+}
