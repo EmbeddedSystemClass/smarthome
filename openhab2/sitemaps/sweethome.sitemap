@@ -1,4 +1,4 @@
-sitemap belmont label="Home" {
+sitemap sweethome label="Home" {
 	Frame {
 		// Group item=gHall label="Комната"
 		// Group item=gKitchen label="Кухня"
@@ -9,17 +9,19 @@ sitemap belmont label="Home" {
 			Text item=TemperTerrace
 			Text item=TemperOutside
 			Text item=TemperRoom
-			// Chart item=gGraphTemper period=d refresh=10000
+			Text item=BaroTemp
+			Text item=HumiTemperature
 			Image refresh=10000 url="http://localhost:8080/rrdchart.png?groups=gGraphTemper&theme=black&period=d&h=300&w=850"
 		}
 		Text label="Влажность" icon="humidity" {
 			Text item=HumidityTerrace 
-			// Chart item=gGraphTemper period=d refresh=10000
+			Text item=HumiHumidity
 			Image refresh=10000 url="http://localhost:8080/rrdchart.png?groups=gGraphHumi&theme=black&period=d&h=300&w=850"
 		}
 		Text label="Вода" icon="water" {
-			Switch item=Valves mappings=[0="Закрыть", 1="Открыть", 2="Авто"]
-			Text item=ValveState
+			Switch item=ValvesCntrl mappings=[0="Авто", 1="Вручную"]
+			Switch item=Valves mappings=[0="Закрыть", 1="Открыть"]
+			//Text item=ValveState
 			//Text item=Flood
 		}
 		Text label="Углекислый газ" icon="carbondioxide" {
@@ -49,7 +51,6 @@ sitemap belmont label="Home" {
 		Text label="Давление" icon="pressure" {
 			Text item=Pressure
 			Text item=Pressure_mmHg
-			Text item=Altitude
 			Switch item=baro_period icon=calendar mappings=[0="12H", 1="D", 2="3D", 3="W", 4="M"]
 
 			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure&theme=black&period=M&h=300&w=850" visibility=[baro_period==4]
@@ -57,13 +58,7 @@ sitemap belmont label="Home" {
 			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure&theme=black&period=3D&h=300&w=850" visibility=[baro_period==2]
 			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure&theme=black&period=D&h=300&w=850" visibility=[baro_period==1]
 			Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=Pressure&theme=black&period=12h&h=300&w=850" visibility=[baro_period==0, baro_period=="Uninitialized", baro_period=="Undefined"]
-		
-			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure,Pressure_mmHg&theme=black&period=M&h=300&w=850" visibility=[baro_period==4]
-			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure,Pressure_mmHg&theme=black&period=W&h=300&w=850" visibility=[baro_period==3]
-			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure,Pressure_mmHg&theme=black&period=3D&h=300&w=850" visibility=[baro_period==2]
-			Image refresh=20000 url="http://localhost:8080/rrdchart.png?items=Pressure,Pressure_mmHg&theme=black&period=D&h=300&w=850" visibility=[baro_period==1]
-			Image refresh=10000 url="http://localhost:8080/rrdchart.png?items=Pressure,Pressure_mmHg&theme=black&period=12h&h=300&w=850" visibility=[baro_period==0, baro_period=="Uninitialized", baro_period=="Undefined"]
-		}
+			}
 	}
 
 	Frame {	
