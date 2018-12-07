@@ -3,3 +3,7 @@ String BatshieldVolt "Напряжение [%s В]" <energy> {mqtt="<[mysensors:
 String BatshieldRaw "АЦП [%d]" <battery> {mqtt="<[mysensors:/batshield-44528/state/bat/raw:state:default]"}
 DateTime BatshieldUpdated "Обновлено [%1$td.%1$tm.%1$tY %1$tr]" <time>
 Number bat_period ""
+
+Switch MyDevice <boy_1> { channel="network:pingdevice:devicename:online" }
+Number MyDeviceResponseTime <boy_1> { channel="network:pingdevice:devicename:latency" }
+DateTime MyDeviceLastSeen <boy_1> { channel="network:pingdevice:devicename:lastseen" }
