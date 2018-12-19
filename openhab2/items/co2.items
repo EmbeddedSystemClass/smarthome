@@ -3,4 +3,4 @@ Number CO2PpmF "Концентрация (filtered) [%.2f ppm]" <carbondioxide> 
 Number CO2PpmU "Концентрация (u_filtered) [%.2f ppm]" <carbondioxide> (gCO2) {mqtt="<[mysensors:/co2-3984651/state/gas/uppm:state:default]"}
 Number gas_period ""
 
-String CO2Temp "Комната [JS(tempsensor.js):%s]"    	<temperature> (gHall,gGraphTemper,gHallValues,gTemperature) 	{mqtt="<[mysensors:/co2-3984651/state/temp/343A31:state:default]"}
+Number CO2Temp "Комната [%.1f °C]" <temperature> (gHall,gGraphTemper,gHallValues,gTemperature) {mqtt="<[mysensors:/co2-3984651/state/temp/343A31:state:default]"}

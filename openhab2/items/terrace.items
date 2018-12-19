@@ -1,7 +1,14 @@
-String TerraceTempIn "Балкон [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gGraphTemper,gHallValues,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/000090:state:default]"}
-String TerraceTempOut  "Улица [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gOutside,gGraphTemper,gHallValues,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/1504CD:state:default]"}
-String TerraceTempDHT  	"DHT [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gTemperature) 			{mqtt="<[mysensors:/terrace/state/dht/temp:state:default]"}
+// String TerraceTempIn "Балкон [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gGraphTemper,gHallValues,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/000090:state:default]"}
+// String TerraceTempOut  "Улица [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gOutside,gGraphTemper,gHallValues,gTemperature) 			{mqtt="<[mysensors:/terrace/state/temp/1504CD:state:default]"}
+// String TerraceTempDHT  	"DHT [JS(tempsensor.js):%s]" 	<temperature> (gTerrace,gTemperature) 			{mqtt="<[mysensors:/terrace/state/dht/temp:state:default]"}
 
-Number TerraceHumidity  "Влажность [JS(humisensor.js):%s]" <humidity>    (gHallValues,gGraphHumi)      {mqtt="<[mysensors:/terrace/state/dht/humi:state:default]"}
+// String TerraceHumidity  "Влажность [JS(humisensor.js):%s]" <humidity>    (gHallValues,gGraphHumi)      {mqtt="<[mysensors:/terrace/state/dht/humi:state:default]"}
+
+Number TerraceTempIn    "Балкон [%.1f °C]"  <temperature> (gTerrace,gGraphTemper,gHallValues,gTemperature)          {mqtt="<[mysensors:/terrace/state/temp/000090:state:default]"}
+Number TerraceTempOut   "Улица [%.1f °C]"   <temperature> (gTerrace,gOutside,gGraphTemper,gHallValues,gTemperature) {mqtt="<[mysensors:/terrace/state/temp/1504CD:state:default]"}
+Number TerraceTempDHT   "DHT [%.1f °C]"     <temperature> (gTerrace,gTemperature)                                   {mqtt="<[mysensors:/terrace/state/dht/temp:state:default]"}
+
+Number TerraceHumidity  "Влажность [%.1f °C]" <humidity>    (gHallValues,gGraphHumi)      {mqtt="<[mysensors:/terrace/state/dht/humi:state:default]"}
+
 
 String LwtTerrace  	"" (gTerrace) 	{mqtt="<[mysensors:/lwt/terrace:state:default]"}

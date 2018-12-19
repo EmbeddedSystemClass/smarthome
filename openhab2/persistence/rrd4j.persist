@@ -4,11 +4,6 @@ Strategies {
 }
 
 Items {
-	CO2Temp : strategy = everySecond, restoreOnStartup
-	TemperTerrace : strategy = everySecond, restoreOnStartup
-	TemperOutside : strategy = everySecond, restoreOnStartup
-	BaroTemp : strategy = everySecond, restoreOnStartup
-	HumidityTerrace : strategy = everySecond, restoreOnStartup
 	HumiHumidity : strategy = everySecond, restoreOnStartup
 	BatshieldLevel : strategy = everySecond, restoreOnStartup
 	BatshieldVolt : strategy = everySecond, restoreOnStartup
