@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# Http request to test service: 
+# wget <ip>:<port>/?topic=twitty --post-data '{"username":"User", "text":"Test"}'
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 import paho.mqtt.client as mqtt
 from urlparse import urlparse, parse_qs
@@ -39,7 +41,7 @@ class myHandler(BaseHTTPRequestHandler):
         if length:
             payload = self.rfile.read(length)
             if payload:
-                tweet = json.loads(payload)
+                tweet = json.loads(payload.replace('\n', '\\n'))
         
         if VERBOSE:
             self.print_request(payload)
@@ -76,7 +78,7 @@ class myHandler(BaseHTTPRequestHandler):
             print payload
             if payload:
                 try:
-                    tweet = json.loads(payload)
+                    tweet = json.loads(payload.replace('\n', '\\n'))
                 except ValueError:
                     print "Wrong payload: " + payload
                     return
