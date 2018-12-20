@@ -49,6 +49,7 @@ end
 function print_msg(m, pl)
     
     --TODO print on LCD
+    print_message(pl)
     print("Message: " .. pl)
 
     if online then
