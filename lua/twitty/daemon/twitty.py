@@ -11,7 +11,8 @@ from profanity import profanity
 import re
 import os
 
-PORT_NUMBER = 8080
+HASHTAG = "#rand123456789"
+HTTP_PORT = 8080
 MQTT_SERVER = "127.0.0.1"
 MQTT_PORT = 1883
 VERBOSE = 1
@@ -31,42 +32,6 @@ class myHandler(BaseHTTPRequestHandler):
         if payload:
             print(payload)
         print("<----- Request End -----\n")
-
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-
-        query_components = parse_qs(urlparse(self.path).query)
-
-        content_length = self.headers.getheaders('content-length')
-        length = int(content_length[0]) if content_length else 0
-        
-        tweet = {}
-        payload = None
-        if length:
-            payload = self.rfile.read(length)
-            if payload:
-                tweet = json.loads(payload.replace('\n', '\\n'))
-        
-        if VERBOSE:
-            self.print_request(payload)
-
-        try:
-            topic = '/' + ''.join(query_components["topic"])
-            text = tweet["text"]
-            user = tweet["username"]
-            msg = user + ': ' + text
-            msg = profanity.censor(msg.encode("utf-8"))
-        except KeyError:
-            print "Wrong request"
-            self.wfile.write("ERROR")
-            return
-            
-        print "Topic:", topic
-        print "Message:", msg
-        client.publish(topic, msg)
-        self.wfile.write("OK")
-        return
 
     def do_POST(self):
         self.send_response(200)
@@ -97,7 +62,7 @@ class myHandler(BaseHTTPRequestHandler):
             topic = '/' + ''.join(query_components["topic"])
             text = tweet["text"]
             user = tweet["username"]
-            msg = user + ': ' + text
+            msg = user + ':' + text.replace(HASHTAG, "")
             msg = profanity.censor(msg.encode("utf-8"))
         except KeyError:
             print "Wrong request"
@@ -131,8 +96,8 @@ profanity.load_words(bad_words_en + bad_words_ru)
 
 
 try:
-    server = HTTPServer(('', PORT_NUMBER), myHandler)
-    print 'Started httpserver on port', PORT_NUMBER
+    server = HTTPServer(('', HTTP_PORT), myHandler)
+    print 'Started httpserver on port', HTTP_PORT
     server.serve_forever()
 
 except KeyboardInterrupt:
