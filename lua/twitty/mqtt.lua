@@ -1,12 +1,27 @@
 local PUBLISH_PERIOD = 10 * 1000
 local SERVICE_PERIOD = 60 * 1000
 local MQTT_KEEPALIVE = 60
+local LOOP_PERIOD = 5 * 1000
+local MAX_TWEETS_COUNT = 30
 
 local pub_tmr = tmr.create()
 local service_tmr = tmr.create()
+
+loop_tmr = tmr.create()
+
 local online = false
 
 local m_dis = {}
+
+local fs = require "fs"
+
+--Restore write index
+local w_ind = fs.read_value("w_ind")
+if w_ind == nil then
+    w_ind = 1
+else
+    w_ind =  tonumber(w_ind)
+end
 
 --Optimization magic
 local mqtt = mqtt
@@ -25,7 +40,7 @@ end
 m:lwt('/lwt/' .. MQTT_CLIENTID, "died", 0, 0)
 
 --Publish service data: uptime, IP, rssi
-function service_pub()
+local function service_pub()
     LedBlink(50)
     time = tmr.time()
     dd = time / (3600 * 24)
@@ -45,21 +60,32 @@ function service_pub()
     m:publish("/"..MQTT_CLIENTID.."/state/rssi", rssi, 0, 1, nil)
 end
 
- --Publish measurements
-function print_msg(m, pl)
-    
-    --TODO print on LCD
-    print_message(pl)
-    print("Message: " .. pl)
+
+ --Print tweet
+ local function print_msg(m, pl)
+    --Reset main loop
+    tmr.start(loop_tmr)
+
+    --Store received tweet
+    if w_ind > MAX_TWEETS_COUNT then
+        w_ind = 1
+    end
+    fs.write_tweet(w_ind, pl)
+
+    print_message(pl, w_ind .. "/" .. MAX_TWEETS_COUNT)
 
     if online then
-        m:publish(MQTT_MAINTOPIC .. '/echo', pl, 0, 1)
+        m:publish(MQTT_MAINTOPIC .. '/echo', pl, 0, 0)
         print("MQTT (online): " .. pl)
         LedBlink(100)
     else
         print("MQTT (offline): " .. pl)
     end
+
+    w_ind = w_ind + 1
+    fs.write_value("w_ind", w_ind)
 end
+
 
 --When client connects, print status message and subscribe to cmd topic
 function handle_mqtt_connect(m)
@@ -72,14 +98,17 @@ function handle_mqtt_connect(m)
 
     --Subscribe to the topic where the ESP8266 will get commands from
     m:subscribe(MQTT_MAINTOPIC .. '/cmd/#', 0, function (m)
-        print('MQTT: subscribed to ' .. MQTT_MAINTOPIC) 
+        print('MQTT: subscribed to ' .. MQTT_MAINTOPIC)
     end)
 
     service_pub()
 
     tmr.alarm(service_tmr, SERVICE_PERIOD, tmr.ALARM_AUTO, service_pub)
     tmr.start(service_tmr)
+
+    animation_start()
 end
+
 
 --When client disconnects, print a message and list space left on stack
 m:on("offline", function(m)
@@ -93,6 +122,7 @@ m:on("offline", function(m)
     do_mqtt_connect()
 end)
 
+
 --Interpret the command
 m:on("message", function(m,t,pl)
     print("PAYLOAD: ", pl)
@@ -104,6 +134,7 @@ m:on("message", function(m,t,pl)
     end
 end)
 
+
 --MQTT error handler
 function handle_mqtt_error(client, reason)
     LedFlicker(50, 200, 5)
@@ -111,15 +142,48 @@ function handle_mqtt_error(client, reason)
     tmr.create():alarm(2 * 1000, tmr.ALARM_SINGLE, do_mqtt_connect)
 end
 
+
 --MQTT connect handler
 function do_mqtt_connect()
   print("Connecting to broker " .. MQTT_HOST ..  "...")
   m:connect(MQTT_HOST, MQTT_PORT, 0, 0, handle_mqtt_connect, handle_mqtt_error)
 end
 
+
+local r_ind = 1
+local animation = true
+
+function loop()
+    if r_ind > MAX_TWEETS_COUNT then
+        r_ind = 1
+    end
+
+    if r_ind >= 5 and r_ind % 5 == 0 and animation == true then
+        animation_start()
+        animation = false
+        return
+    end
+
+    local tweet = fs.read_tweet(r_ind)
+    if tweet ~= nil then
+        --print("Tweet " .. r_ind .. ":" .. tweet)
+        print_message(tweet, r_ind .. "/" .. MAX_TWEETS_COUNT)
+        r_ind = r_ind + 1
+    else
+        --animation_start()
+        r_ind = 1
+    end
+    animation = true
+    tmr.interval(loop_tmr, string.len(tweet) * 1000)
+    tmr.start(loop_tmr)
+end
+
+
 --Assign MQTT handlers
 m_dis[MQTT_MAINTOPIC .. '/cmd/display'] = print_msg
 
+
+tmr.alarm(loop_tmr, LOOP_PERIOD, tmr.ALARM_SEMI, loop)
 
 --Connect to the broker
 do_mqtt_connect()
