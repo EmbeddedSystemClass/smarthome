@@ -1,0 +1,5 @@
+fonts: 
+font_6x10_tf,font_haxrcorp4089_t_cyrillic,font_unifont_t_symbols
+
+modules:
+bit, file, gpio, http, i2c, mqtt, net, node, spi, tmr, u8g2, uart, wifi.
