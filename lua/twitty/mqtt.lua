@@ -154,6 +154,8 @@ local r_ind = 1
 local animation = true
 
 function loop()
+    local timeout = LOOP_PERIOD
+
     if r_ind > MAX_TWEETS_COUNT then
         r_ind = 1
     end
@@ -161,6 +163,8 @@ function loop()
     if r_ind >= 5 and r_ind % 5 == 0 and animation == true then
         animation_start()
         animation = false
+        tmr.interval(loop_tmr, timeout)
+        tmr.start(loop_tmr)
         return
     end
 
@@ -168,13 +172,14 @@ function loop()
     if tweet ~= nil then
         --print("Tweet " .. r_ind .. ":" .. tweet)
         print_message(tweet, r_ind .. "/" .. MAX_TWEETS_COUNT)
+        timeout = string.len(tweet) * 500
         r_ind = r_ind + 1
     else
         --animation_start()
         r_ind = 1
     end
     animation = true
-    tmr.interval(loop_tmr, string.len(tweet) * 1000)
+    tmr.interval(loop_tmr, timeout)
     tmr.start(loop_tmr)
 end
 
