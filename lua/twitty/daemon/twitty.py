@@ -62,7 +62,7 @@ class myHandler(BaseHTTPRequestHandler):
             topic = '/' + ''.join(query_components["topic"])
             text = tweet["text"]
             user = tweet["username"]
-            msg = user + ':' + text.replace(HASHTAG, "")
+            msg = '@' + user + ':' + text.replace(HASHTAG, "")
             msg = profanity.censor(msg.encode("utf-8"))
         except KeyError:
             print "Wrong request"
