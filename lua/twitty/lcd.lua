@@ -1,10 +1,9 @@
 local FONT_HEIGHT = 10
+local FONT_WIDTH = 8
 
 ALIGN_LEFT = 0
 ALIGN_CENTER = 1
 ALIGN_RIGHT = 2
-
-local HASHTAG = "#RotekCristmasTree"
 
 local x = 0
 local y = 16
@@ -73,7 +72,32 @@ function print_message(str, meta)
    local text = string.gsub(str, user .. ":", "")
    --Remove trailing space
    text = string.gsub(text, "^%s*", "")
-   disp:drawUTF8(0, 16, text)
+
+   local i_start = 0
+   for i = 1, 3 do
+      local i_end = i_start + 128 / 6
+      local line = string.sub(text, i_start, i_end)
+      local non_printable = 0
+      while string.len(string.sub(text, i_start)) > string.len(line) and disp:getUTF8Width(line) < 120 do
+         local len = disp:getUTF8Width(line)
+         print(len)
+         --print(line)
+         i_end = i_end + 1
+         line = string.sub(text, i_start, i_end)
+
+         --Check number of nonprintable chars
+         if disp:getUTF8Width(line) == len then
+            non_printable = non_printable + 1
+            if non_printable > 5 then
+               break
+            end
+         end
+      end
+      i_start = i_end + 1
+      print(i_start .. ":" .. line)
+      disp:drawUTF8(0, 16 * i, line)
+   end
+
    disp:sendBuffer()
 end
 

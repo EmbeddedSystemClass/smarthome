@@ -172,7 +172,7 @@ function loop()
     if tweet ~= nil then
         --print("Tweet " .. r_ind .. ":" .. tweet)
         print_message(tweet, r_ind .. "/" .. MAX_TWEETS_COUNT)
-        timeout = string.len(tweet) * 500
+        timeout = string.len(tweet) * 50
         r_ind = r_ind + 1
     else
         --animation_start()

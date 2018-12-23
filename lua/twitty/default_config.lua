@@ -24,6 +24,10 @@ MQTT_PASSWORD = ""
 
 -- OTHERS
 TELNET_MODULE = 1 -- 1 to active
+LCD_MODULE = 1 -- 1 to active
+
+-- Twitter
+HASHTAG = "#YourHashTag"
 
 
 -- Confirmation message
