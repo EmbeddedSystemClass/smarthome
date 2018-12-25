@@ -87,6 +87,23 @@ end
 end
 
 
+--Tweets erase
+local function erase(m, pl)
+    tmr.stop(loop_tmr)
+    if pl == "all" then
+        fs.erase_all(MAX_TWEETS_COUNT)
+        print("Erased all")
+    else
+        local num = tonumber(pl)
+        if num ~= nil then
+            fs.erase_tweet(num)
+            print("Erased tweet " .. num)
+        end
+    end
+    tmr.start(loop_tmr)
+end
+
+
 --When client connects, print status message and subscribe to cmd topic
 function handle_mqtt_connect(m)
     --Set connection status flag
@@ -170,15 +187,20 @@ function loop()
 
     local tweet = fs.read_tweet(r_ind)
     if tweet ~= nil then
-        --print("Tweet " .. r_ind .. ":" .. tweet)
         print_message(tweet, r_ind .. "/" .. MAX_TWEETS_COUNT)
-        timeout = string.len(tweet) * 50
+        timeout = disp:getUTF8Width(tweet) * 50
+        if timeout < 3000 then
+            timeout = 3000
+        elseif timeout > 6000 then
+            timeout = 6000
+        end
+        animation = true
         r_ind = r_ind + 1
     else
-        --animation_start()
-        r_ind = 1
+        animation = false
+        timeout = 1
+        r_ind = r_ind + 1
     end
-    animation = true
     tmr.interval(loop_tmr, timeout)
     tmr.start(loop_tmr)
 end
@@ -186,6 +208,7 @@ end
 
 --Assign MQTT handlers
 m_dis[MQTT_MAINTOPIC .. '/cmd/display'] = print_msg
+m_dis[MQTT_MAINTOPIC .. '/cmd/erase'] = erase
 
 
 tmr.alarm(loop_tmr, LOOP_PERIOD, tmr.ALARM_SEMI, loop)
