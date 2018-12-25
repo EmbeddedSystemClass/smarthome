@@ -18,6 +18,24 @@ function fs.read_tweet(n)
     return msg
 end
 
+function fs.erase_tweet(n)
+    name = "tweet" .. n .. ".txt"
+    if file.exists(name) then
+        file.close(name)
+        file.remove(name)
+    end
+end
+
+function fs.erase_all(count)
+    for n = 1, count do
+        name = "tweet" .. n .. ".txt"
+        if file.exists(name) then
+            file.close(name)
+            file.remove(name)
+        end
+    end
+end
+
 function fs.read_value(name)
     local value = nil
     if file.open(name .. ".txt", "r") then
