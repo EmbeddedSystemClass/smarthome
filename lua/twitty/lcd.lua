@@ -20,8 +20,8 @@ local function init_spi_display()
    -- Hardware SPI MISO = GPIO12 (not used)
    -- Hardware SPI /CS  = GPIO15 (not used)
    -- CS, D/C, and RES can be assigned freely to available GPIOs
-   local cs  = 8 -- GPIO15, pull-down 10k to GND
-   local dc  = 4 -- GPIO2
+   local cs  = 1 -- GPIO5, pull-down 10k to GND
+   local dc  = 6 -- GPIO12
    local res = 0 -- GPIO16
 
    spi.setup(1, spi.MASTER, spi.CPOL_LOW, spi.CPHA_LOW, 8, 8)
@@ -80,7 +80,7 @@ function print_message(str, meta)
       local non_printable = 0
       while string.len(string.sub(text, i_start)) > string.len(line) and disp:getUTF8Width(line) < 125 do
          local len = disp:getUTF8Width(line)
-         
+
          --print(line)
 
          i_end = i_end + 1
