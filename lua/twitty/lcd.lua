@@ -78,10 +78,11 @@ function print_message(str, meta)
       local i_end = i_start + 128 / 6
       local line = string.sub(text, i_start, i_end)
       local non_printable = 0
-      while string.len(string.sub(text, i_start)) > string.len(line) and disp:getUTF8Width(line) < 120 do
+      while string.len(string.sub(text, i_start)) > string.len(line) and disp:getUTF8Width(line) < 125 do
          local len = disp:getUTF8Width(line)
-         print(len)
+         
          --print(line)
+
          i_end = i_end + 1
          line = string.sub(text, i_start, i_end)
 
@@ -89,9 +90,13 @@ function print_message(str, meta)
          if disp:getUTF8Width(line) == len then
             non_printable = non_printable + 1
             if non_printable > 5 then
+               print("break")
                break
             end
+         else
+            non_printable = 0
          end
+
       end
       i_start = i_end + 1
       print(i_start .. ":" .. line)
