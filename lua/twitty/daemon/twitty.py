@@ -11,7 +11,7 @@ from profanity import profanity
 import re
 import os
 
-HASHTAG = "#rand123456789"
+HASHTAG = "#OurCristmasTree"
 HTTP_PORT = 8080
 MQTT_SERVER = "127.0.0.1"
 MQTT_PORT = 1883
@@ -62,7 +62,8 @@ class myHandler(BaseHTTPRequestHandler):
             topic = '/' + ''.join(query_components["topic"])
             text = tweet["text"]
             user = tweet["username"]
-            msg = '@' + user + ':' + text.replace(HASHTAG, "")
+            hashtag_pattern = re.compile(HASHTAG, re.IGNORECASE)
+            msg = '@' + user + ':' + hashtag_pattern.sub("", text)
             msg = profanity.censor(msg.encode("utf-8"))
         except KeyError:
             print "Wrong request"
