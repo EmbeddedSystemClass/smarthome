@@ -92,6 +92,9 @@ local function erase(m, pl)
     tmr.stop(loop_tmr)
     if pl == "all" then
         fs.erase_all(MAX_TWEETS_COUNT)
+        w_ind = 1
+        r_ind = 1
+        fs.write_value("w_ind", w_ind)
         print("Erased all")
     else
         local num = tonumber(pl)
@@ -197,8 +200,12 @@ function loop()
         animation = true
         r_ind = r_ind + 1
     else
-        animation = false
-        timeout = 1
+        if r_ind < 5 then
+            animation = true
+        else
+            animation = false
+        end
+        timeout = 10
         r_ind = r_ind + 1
     end
     tmr.interval(loop_tmr, timeout)
