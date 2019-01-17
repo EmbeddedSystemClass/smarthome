@@ -39,6 +39,10 @@ end
 
 load_lib("led")
 
+if LCD_MODULE == 1 then
+    load_lib("lcd")
+end
+
 local ssid, pass = nil
 local wifiReady = 0
 local firstPass = 0
@@ -53,6 +57,10 @@ function connectWiFi(ssid_list)
     end
     if ssid ~= nil then
         print("Connecting to "..ssid)
+        if LCD_MODULE == 1 then
+            clear_display()
+            print_row(0, "Connecting "..ssid, ALIGN_CENTER)
+        end
         -- New wifi module API used since nodemcu fw pull request #1497
         station_cfg={}
         station_cfg.ssid = ssid
@@ -60,6 +68,9 @@ function connectWiFi(ssid_list)
         wifi.sta.config(station_cfg)
     else
         print("No SSIDs found")
+        if LCD_MODULE == 1 then
+            print_row(0, "No SSIDs found", ALIGN_CENTER)
+        end
         LedFlicker(50, 100, 5)
     end
     tmr.alarm(WIFI_ALARM_ID, 2000, tmr.ALARM_AUTO, wifi_watch)
@@ -71,6 +82,10 @@ function configureWiFi()
     wifi.setmode(wifi.STATION)
     if tablelen(WIFI_AUTH) > 1 then
         -- scan available networks
+        if LCD_MODULE == 1 then
+            clear_display()
+            print_row(0, "Scanning Wi-Fi...", ALIGN_CENTER)
+        end
         wifi.sta.getap(connectWiFi)
     else
         -- connect to the predefined SSID
@@ -85,6 +100,10 @@ function wifi_watch()
     if status == wifi.STA_GOTIP and wifiReady == 0 then
         wifiReady = 1
         print("WiFi: connected with " .. wifi.sta.getip())
+        if LCD_MODULE == 1 then
+            clear_display()
+            print_row(0, "IP: " .. wifi.sta.getip(), ALIGN_CENTER)
+        end
         LedBlink(400)
         --run modules on first start only
         if firstPass == 0 then
@@ -103,6 +122,10 @@ function wifi_watch()
         wifiReady = 0
         LedFlicker(50, 500, 10)
         print("WiFi: (re-)connecting")
+        if LCD_MODULE == 1 then
+            clear_display()
+            print_row(0, "Connecting "..ssid, ALIGN_CENTER)
+        end
     end
 end
 
