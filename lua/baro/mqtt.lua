@@ -32,6 +32,9 @@ m:lwt('/lwt/' .. MQTT_CLIENTID, "died", 0, 0)
 
 --Publish service data: uptime, IP, rssi
 function service_pub()
+    if not online then
+        return
+    end
     LedBlink(50)
     time = tmr.time()
     dd = time / (3600 * 24)
@@ -53,6 +56,9 @@ end
 
  --Publish measurements
 function pub()
+    if not online then
+        return
+    end
     LedBlink(50)
 
     --Get temperature and air pressure
@@ -134,6 +140,7 @@ m:on("offline", function(m)
     print ("\n\nDisconnected from broker")
     print("Heap: ", node.heap())
     tmr.stop(service_tmr)
+    tmr.stop(pub_tmr)
     do_mqtt_connect()
 end)
 
@@ -151,7 +158,7 @@ end)
 --MQTT error handler
 function handle_mqtt_error(client, reason)
     LedFlicker(50, 200, 5)
-    tmr.create():alarm(2 * 1000, tmr.ALARM_SINGLE, do_mqtt_connect)
+    tmr.create():alarm(5 * 1000, tmr.ALARM_SINGLE, do_mqtt_connect)
 end
 
 --MQTT connect handler
