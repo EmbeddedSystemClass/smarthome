@@ -1,4 +1,6 @@
 local servo = require "servo"
+local SERVICE_PERIOD = 60 * 1000
+local service_tmr = tmr.create()
 require "runtime"
 require "trimmer"
 
@@ -15,10 +17,6 @@ local servo_en = 7
 -- Holds dispatching keys to different topics. Serves as a makeshift callback
 -- function dispatcher based on topic and message content
 m_dis = {}
-
-MQTT_CLIENTID = "water"
-MQTT_HOST = "192.168.1.206"
-MQTT_PORT = 1883
 
 -- Standard counter variable. Used for modulo arithmatic
 local count = 0
@@ -196,40 +194,66 @@ m_dis["/water/cmd/trim_closed"] = set_trimmer_closed --<valve num>,<pos> - close
 m_dis["/water/cmd/trim_opened"] = set_trimmer_opened --<valve num>,<pos> - opened valve position
 m_dis["/water/cmd/time"] = set_timer --<valve num>,<time> - time to run valve
 
+
 -- initialize mqtt client with keepalive timer of 60sec
-m = mqtt.Client(MQTT_CLIENTID, 60, "", "") -- Living dangerously. No password!
+if m == nil then
+    m = mqtt.Client(MQTT_CLIENTID, 60, MQTT_USERNAME, MQTT_PASSWORD) 
+else
+    m:close()
+end
 
+-- events
+m:lwt('/lwt/' .. MQTT_CLIENTID, "died", 0, 0)
 
--- Set up Last Will and Testament (optional)
--- Broker will publish a message with qos = 0, retain = 0, data = "offline"
--- to topic "/lwt" if client don't send keepalive packet
-m:lwt("/lwt", "Oh noes! Plz! I don't wanna die!", 0, 0)
-
+-- Publish service data: uptime and IP
+function service_pub()
+    --LedBlink(50)
+    time = tmr.time()
+    dd = time / (3600 * 24)
+    hh = (time / 3600) % 24
+    mm = (time / 60) % 60
+    local str = string.format("%dd %dh %dm", dd, hh, mm)
+    --print(str)
+    m:publish("/"..MQTT_CLIENTID.."/state/uptime", str, 0, 1, nil)
+    ip = wifi.sta.getip()
+    if ip == nil then
+        ip = "unknown"
+    end
+    rssi = wifi.sta.getrssi()
+    if rssi == nil then
+        rssi = "unknown"
+    end
+    m:publish("/"..MQTT_CLIENTID.."/state/ip", ip, 0, 1, nil)
+    m:publish("/"..MQTT_CLIENTID.."/state/rssi", rssi, 0, 1, nil)
+end
 
 -- When client connects, print status message and subscribe to cmd topic
-m:on("connect", function(m) 
+function handle_mqtt_connect(m)
     -- Serial status message
-    print ("\n\n", MQTT_CLIENTID, " connected to MQTT host ", MQTT_HOST,
+    print("\n\n", MQTT_CLIENTID, " connected to MQTT host ", MQTT_HOST,
         " on port ", MQTT_PORT, "\n\n")
 
     -- Subscribe to the topic where the ESP8266 will get commands from
-    m:subscribe("/water/cmd/#", 0,
-        function(m) 
-            print("Subscribed to CMD Topic") 
-            pump_stop()
-        end) 
-end)
+    m:subscribe(MQTT_MAINTOPIC .. '/cmd/#', 0, function (m)
+        print('MQTT : subscribed to ', MQTT_MAINTOPIC) 
+    end)
 
+    -- Publish service data periodicaly
+    service_pub()
+    tmr.alarm(service_tmr, SERVICE_PERIOD, tmr.ALARM_AUTO, service_pub)
+    tmr.start(service_tmr)
+end
 
 -- When client disconnects, print a message and list space left on stack
 m:on("offline", function(m)
     print ("\n\nDisconnected from broker")
     print("Heap: ", node.heap())
+    tmr.stop(service_tmr)
+    do_mqtt_connect()
 end)
 
-
 -- On a publish message receive event, run the message dispatcher and
--- interpret the command 
+-- interpret the command
 m:on("message", function(m,t,pl)
     print("PAYLOAD: ", pl)
     print("TOPIC: ", t)
@@ -241,8 +265,17 @@ m:on("message", function(m,t,pl)
     end
 end)
 
-print("Connecting to: ", MQTT_HOST)
--- Connect to the broker
-print(m:connect(MQTT_HOST, MQTT_PORT, 0, 1))
---m:close()
+-- MQTT error handler
+function handle_mqtt_error(client, reason)
+    --LedFlicker(50, 200, 5)
+    tmr.create():alarm(2 * 1000, tmr.ALARM_SINGLE, do_mqtt_connect)
+end
 
+-- MQTT connect handler
+function do_mqtt_connect()
+  print("Connecting to broker", MQTT_HOST, "...")
+  m:connect(MQTT_HOST, MQTT_PORT, 0, 0, handle_mqtt_connect, handle_mqtt_error)
+end
+
+-- Connect to the broker
+do_mqtt_connect()
