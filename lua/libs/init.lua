@@ -58,11 +58,11 @@ function connectWiFi(ssid_list)
         station_cfg.ssid = ssid
         station_cfg.pwd = pass
         wifi.sta.config(station_cfg)
-        tmr.alarm(WIFI_ALARM_ID, 2000, tmr.ALARM_AUTO, wifi_watch)
     else
         print("No SSIDs found")
         LedFlicker(50, 100, 5)
     end
+    tmr.alarm(WIFI_ALARM_ID, 2000, tmr.ALARM_AUTO, wifi_watch)
 end
 
 -- configure WIFI network
