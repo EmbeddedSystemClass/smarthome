@@ -1,1 +1,1 @@
- dofile ("mqtt.lua")
+ load_lib("mqtt")
