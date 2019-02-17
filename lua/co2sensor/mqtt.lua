@@ -8,8 +8,9 @@ local gas = require("mq135")
 local moving_average = require("filter")
 local fs = require("fs")
 
-local filter = moving_average(20)
-local ufilter = moving_average(20)
+local MEASURE_PERIOD = 500
+local FILTER_PERIOD = 30 * 1000
+local filter = moving_average(FILTER_PERIOD / MEASURE_PERIOD)
 
 -- Holds keys and callbacks to different topics
 local m_dis = {}
@@ -132,22 +133,25 @@ function pub()
     end
 
     --publish CO2 data
-    local str = string.format("%0.2f", gas.get_ppm())
+    local ppm_raw = gas.get_ppm()
+    local str = string.format("%0.2f", ppm_raw)
     print("ppm:", str)
-    m:publish("/"..MQTT_CLIENTID.."/state/gas/ppm", str, 0, 0, nil)
+    m:publish("/"..MQTT_CLIENTID.."/state/gas/ppm/raw", str, 0, 0, nil)
 
-    local ppm = filter:get_value(gas.get_ppm())
-    check_alarm(ppm)
-    local str = string.format("%0.2f", ppm)
-    print("fppm:", str)
-    m:publish("/"..MQTT_CLIENTID.."/state/gas/fppm", str, 0, 0, nil)
+    local ppm_average = filter:get_average()
+    local str = string.format("%0.2f", ppm_average)
+    print("ppm_average:", str)
+    m:publish("/"..MQTT_CLIENTID.."/state/gas/ppm/average", str, 0, 0, nil)
 
-    local str = string.format("%0.2f", ufilter:get_uvalue(gas.get_ppm()))
-    print("uppm:", str)
-    m:publish("/"..MQTT_CLIENTID.."/state/gas/uppm", str, 0, 0, nil)
+    local ppm_minmax = filter:get_average_minmax()
+    local str = string.format("%0.2f", ppm_minmax)
+    print("ppm_minmax:", str)
+    m:publish("/"..MQTT_CLIENTID.."/state/gas/ppm/minmax", str, 0, 0, nil)
 
     local str = string.format("%0.3f", gas.get_volt())
     m:publish("/"..MQTT_CLIENTID.."/state/gas/volt", str, 0, 0, nil)
+
+    check_alarm(ppm_average)
 end
 
 -- When client connects, print status message and subscribe to cmd topic
@@ -223,6 +227,12 @@ else
 end
 
 m_dis[MQTT_MAINTOPIC .. '/cmd/calibrate'] = calibrate
+
+
+-- Start measurements
+tmr.create():alarm(MEASURE_PERIOD, tmr.ALARM_AUTO, function()
+    filter:add_value(gas.get_ppm())
+end)
 
 -- Connect to the broker
 do_mqtt_connect()

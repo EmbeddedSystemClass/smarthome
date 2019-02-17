@@ -16,7 +16,7 @@ function filter.new(size)
     return self
 end
 
-function filter:get_value(value)
+function filter:add_value(value)
     if not (self.head < self.len) then
         self.head = 1
     end
@@ -26,21 +26,13 @@ function filter:get_value(value)
     self.sum = self.sum + value
     self.buf[self.head] = value
     self.head = self.head + 1
+end
 
+function filter:get_average()
     return self.sum / table.getn(self.buf)
 end
 
-function filter:get_uvalue(value)
-    if not (self.head < self.len) then
-        self.head = 1
-    end
-    if self.buf[self.head] ~= nil then
-        self.sum = self.sum - self.buf[self.head]
-    end
-    self.sum = self.sum + value
-    self.buf[self.head] = value
-    self.head = self.head + 1
-
+function filter:get_average_minmax()
     local imax, max = 1, self.buf[1]
     local imin, min = 1, self.buf[1]
     for k, v in ipairs(self.buf) do
