@@ -8,9 +8,9 @@ Items {
 	BatshieldLevel : strategy = everySecond, restoreOnStartup
 	BatshieldVolt : strategy = everySecond, restoreOnStartup
 	GassensVolt : strategy = everySecond, restoreOnStartup
-	CO2Ppm : strategy = everySecond, restoreOnStartup
-	CO2PpmF : strategy = everySecond, restoreOnStartup
-	CO2PpmU : strategy = everySecond, restoreOnStartup
+	CO2PpmRaw : strategy = everySecond, restoreOnStartup
+	CO2PpmAverage : strategy = everySecond, restoreOnStartup
+	CO2PpmMinmax : strategy = everySecond, restoreOnStartup
 	Pressure : strategy = everySecond, restoreOnStartup
 	Pressure_mmHg : strategy = everySecond, restoreOnStartup
 	MyDevice : strategy = everySecond, everyChange, restoreOnStartup
