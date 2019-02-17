@@ -7,11 +7,14 @@ Strategies {
 }
  
 Items {
-	CO2PpmU : strategy = everyUpdate
+	CO2PpmAverage : strategy = everyUpdate
+	CO2PpmRaw : strategy = everyUpdate
+	CO2PpmMinmax : strategy = everyUpdate
 	CO2Temp : strategy = everyUpdate
 	BaroTemp : strategy = everyUpdate
 	HumiTemp : strategy = everyUpdate
 	HumiHumidity : strategy = everyUpdate
 	TerraceTempIn : strategy = everyUpdate
 	TerraceTempOut : strategy = everyUpdate
+	Pressure_mmHg : strategy = everyUpdate
 }
