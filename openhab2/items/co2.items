@@ -1,6 +1,0 @@
-Number CO2PpmRaw "Концентрация (raw) [%.2f ppm]" <carbondioxide> (gCO2) {mqtt="<[mysensors:/co2-3984651/state/gas/ppm/raw:state:default]"}
-Number CO2PpmAverage "Концентрация (average) [%.2f ppm]" <carbondioxide> (gCO2) {mqtt="<[mysensors:/co2-3984651/state/gas/ppm/average:state:default]"}
-Number CO2PpmMinmax "Концентрация (minmax) [%.2f ppm]" <carbondioxide> (gCO2) {mqtt="<[mysensors:/co2-3984651/state/gas/ppm/minmax:state:default]"}
-Number gas_period ""
-
-Number CO2Temp "Комната [%.1f °C]" <temperature> (gHall,gGraphTemper,gHallValues,gTemperature) {mqtt="<[mysensors:/co2-3984651/state/temp/343A31:state:default]"}

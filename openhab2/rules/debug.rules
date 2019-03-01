@@ -1,8 +1,0 @@
-rule "Batshield Updated"
-when
-        Item BatshieldVolt received update or
-        Item BatshieldLevel received update or
-        Item BatshieldRaw received update
-then
-        BatshieldUpdated.postUpdate(new DateTimeType())
-end

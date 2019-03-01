@@ -1,1 +1,0 @@
-Thing network:pingdevice:devicename [hostname="192.168.1.60", retry=11]

@@ -1,2 +1,0 @@
-Number HumiTemp "SHT30 [%.1f °C]" <temperature> (gGraphTemper,gTemperature) {mqtt="<[mysensors:/humi-2777395/state/temp:state:default]"}
-Number HumiHumidity "Комната [%.1f %%PH]" <humidity> (gGraphHumi,gHumidity) {mqtt="<[mysensors:/humi-2777395/state/humi:state:default]"}
